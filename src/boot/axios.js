@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import axios from 'axios'
 import Roles from '../utils/roles'
+import Cookies from '../utils/cookie'
 
 function errorResponseHandler (_error, router) {
   const isReponseData = _error && _error.response && _error.response.data
@@ -23,6 +24,13 @@ export default ({ router }) => {
       errorResponseHandler(_error, router)
     }
   )
+
+  axios.interceptors.request.use(
+    config => {
+      config.headers.Auth = Cookies.getCookie(Roles.AUTH_TOKEN_NAME);
+      return config;
+    }
+  );
 
   Vue.prototype.$axios = axios
 }

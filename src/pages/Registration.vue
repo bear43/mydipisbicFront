@@ -3,7 +3,7 @@
       <q-form
       @submit="onSubmit"
       @reset="onReset"
-      class="q-gutter-md"
+      class="q-gutter-md q-mt-sm"
     >
       <q-input
         clearable

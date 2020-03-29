@@ -2,7 +2,7 @@
 const routes = [
     {
       path: '/',
-      component: () => import('layouts/MainLayout.vue'),
+      component: () => import('../layouts/MainLayout.vue'),
       children: [
         { path: '', component: () => import('pages/Index.vue') }
       ],
@@ -12,14 +12,14 @@ const routes = [
     },
     {
       path: '/login',
-      component: () => import('layouts/MainLayout.vue'),
+      component: () => import('../layouts/MainLayout.vue'),
       children: [
         { path: '', component: () => import('pages/Login.vue') }
       ]
     },
     {
       path: '/user-cabinet',
-      component: () => import('layouts/MainLayout.vue'),
+      component: () => import('../layouts/MainLayout.vue'),
       children: [
         { path: '', component: () => import('pages/UserCabinet.vue') }
       ],
@@ -29,9 +29,16 @@ const routes = [
     },
     {
       path: '/registration',
-      component: () => import('layouts/MainLayout.vue'),
+      component: () => import('../layouts/MainLayout.vue'),
       children: [
         { path: '', component: () => import('pages/Registration.vue') }
+      ]
+    }, 
+    {
+      path: '/task-types',
+      component: () => import('../layouts/MainLayout.vue'),
+      children: [
+        { path: '', component: () => import('../pages/TaskType.vue') }
       ]
     }
   ]
