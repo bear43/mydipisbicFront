@@ -20,11 +20,17 @@ export default {
         title: 'Название',
         remove: 'Удалить',
         save: 'Сохранить',
-        add: 'Добавить'
+        add: 'Добавить',
+        tasks: 'Задачи',
+        priority: 'Приоритет',
+        notChoosed: 'Не выбрано',
+        type: 'Тип',
+        executor: 'Исполнитель'
     },
     notify: {
         successfulSignIn: 'Успешный вход',
-        successfulLogout: 'Успешный выход'
+        successfulLogout: 'Успешный выход',
+        successful: 'Успешно'
     },
     error: {
         emptyField: 'Поле не может быть пустым',

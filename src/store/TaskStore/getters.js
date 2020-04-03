@@ -1,4 +1,4 @@
-import { change } from "./mutations";
+import { findElementInState } from "./mutations";
 
 /*
 export function someGetter (state) {
@@ -9,10 +9,10 @@ export function hasNewTasks(state) {
 }
 
 function privateHasChanges(object) {
-    let changed = object.originalValue;
-        if (changed) {
-            for (let propertyName in object.originalValue) {
-                if (object[propertyName] !== object.originalValue[propertyName]) {
+    let originalValueArray = object.originalValue;
+        if (originalValueArray) {
+            for (let propertyName in originalValueArray) {
+                if (object[propertyName] !== originalValueArray[propertyName]) {
                     return true;
                 }
             }
@@ -21,16 +21,9 @@ function privateHasChanges(object) {
 }
 
 export function hasChanges(state) {
-    return taskId => {
-        const task = state.tasks.filter(task => task.id === taskId)[0];
-        return privateHasChanges(task);
-    }
-}
-
-export function hasTypeChanges(state) {
-    return typeId => {
-        const type = state.taskTypes.filter(t => t.id === typeId)[0];
-        return privateHasChanges(type);
+    return changeData => {
+        const object = findElementInState(state, changeData);
+        return privateHasChanges(object.element);
     }
 }
 

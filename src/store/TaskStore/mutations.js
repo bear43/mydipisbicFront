@@ -9,7 +9,7 @@ function findIndexInStateSrc(stateSrc, data) {
     return stateSrc.indexOf(data);
 }
 
-function findElementInState(state, data) {
+export function findElementInState(state, data) {
     return {
         stateSrc: state[data.stateSrc],
         element: data.data,
@@ -17,24 +17,40 @@ function findElementInState(state, data) {
     }
 }
 
-export function add(state, newTask) {
-    if (newTask.id == null) {
-        newTask.originalValue = [];
-        newTask.originalValue['id'] = null;
-        newTask.id = -state.tasks.length;
-    }
-    state.tasks.push(newTask);
-}
+/* Common functions */
 
 export function change(state, changeData) {
-    const stateSrc = state[changeData.stateSrc];
-    const index = findIndexInStateSrc(stateSrc, changeData);
+    const elementInfo = findElementInState(state, changeData);
+    if (elementInfo.index !== -1) {
+        if (!elementInfo.element.originalValue) {
+            elementInfo.element.originalValue = {};
+        }
+        if (!elementInfo.element.originalValue[changeData.property]) {
+            elementInfo.element.originalValue[changeData.property] = elementInfo.element[changeData.property];
+        }
+        elementInfo.element[changeData.property] = changeData.value;
+    }
 }
 
-/* Common functions */
+export function reset(state, resetData) {
+    const elementInfo = findElementInState(state, resetData);
+    if(elementInfo.index !== -1) {
+        if(elementInfo.element.originalValue) {
+            const originalValueArray = elementInfo.element.originalValue;
+            const keys = Object.keys(originalValueArray);
+            for(let index in keys) {
+                const property = keys[index];
+                elementInfo.element[property] = originalValueArray[property];
+            }
+        }
+    }
+}
 
 export function setChangedState(state, stateData) {
     stateData.object.changed = stateData.changed;
+    if (!stateData.changed) {
+        stateData.object.originalValue = null;
+    }
 }
 
 export function save(state, saveData) {
@@ -51,7 +67,7 @@ export function updateElementId(state, updateData) {
 
 export function remove(state, removeData) {
     const element = findElementInState(state, removeData);
-    if(element.index !== -1) {
+    if (element.index !== -1) {
         element.stateSrc.splice(element.index, 1);
     }
 }
@@ -66,12 +82,34 @@ export function setTaskTypes(state, types) {
 }
 
 export function addTaskType(state, taskType) {
-    if(taskType.changed === undefined) {
-        taskType.changed = false;
-    }
+    taskType.originalValue = null;
     if (taskType.id == null) {
         taskType.id = state.getNewId('taskTypes');
         taskType.title = 'Новый тип задачи №' + -taskType.id;
     }
     state.taskTypes.push(taskType);
+}
+
+/* Task */
+
+export function setTasks(state, tasks) {
+    state.tasks = [];
+    tasks.forEach(task => {
+        addTask(state, task);
+    });
+}
+
+export function addTask(state, task) {
+    task.originalValue = null;
+    if (task.id == null) {
+        task.id = state.getNewId('tasks');
+        task.title = 'Новая задача №' + -task.id;
+    }
+    state.tasks.push(task);
+}
+
+/* TASK PRIORITIES */
+
+export function setPriorities(state, priorities) {
+    state.taskPriorities = priorities;
 }
