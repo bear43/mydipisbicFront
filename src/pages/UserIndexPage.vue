@@ -38,6 +38,29 @@
       }) && column.showOnChanged)"
               />
             </div>
+            <div v-else-if="column.name==='executor'">
+              {{props.row.executor ? props.row.executor.lastName + ' ' + props.row.executor.firstName + ' ' + props.row.executor.secondName : $t('label.notChoosed') }}
+              <q-popup-edit :value="props.row.executor">
+                <q-select
+                  filled
+                  :value="props.row.executor"
+                  use-chips
+                  use-input
+                  :label="$t('label.executor')"
+                  :options="executors"
+                  @filter="filterFn"
+                  @filter-abort="abortFilterFn"
+                  @input="onExecutorSelected(props.row, $event)"
+                  :option-label="item => item.lastName + ' ' + item.firstName + ' ' + item.secondName + '. Кабинет: ' + item.cabinet"
+                >
+                  <template v-slot:no-option>
+                    <q-item>
+                      <q-item-section class="text-grey">{{$t('label.noResult')}}</q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </q-popup-edit>
+            </div>
             <div v-else>{{ column.value }}</div>
             <q-popup-edit :value="column.value" v-if="column.editable">
               <q-select
@@ -69,13 +92,14 @@
 </template>
 
 <script>
-
-import Roles from '../utils/roles'
+import Roles from "../utils/roles";
+import axios from "../boot/axios";
 
 export default {
   name: "PageTaskType",
   data() {
     return {
+      executor: null,
       columns: [
         {
           name: "remove",
@@ -116,15 +140,17 @@ export default {
           align: "center",
           sortable: true,
           field: task => {
-            return task.priority ? task.priority.value : this.$t('label.notChoosed');
+            return task.priority
+              ? task.priority.value
+              : this.$t("label.notChoosed");
           },
           show: true,
           editable: true,
           selectable: true,
           options: this.priorities,
           displayValue: "value",
-          optionValue: 'key',
-          optionLabel: 'value',
+          optionValue: "key",
+          optionLabel: "value",
           onSelect: (object, value) => {
             this.$store.dispatch("TaskStore/change", {
               stateSrc: "tasks",
@@ -141,15 +167,15 @@ export default {
           align: "center",
           sortable: true,
           field: task => {
-            return task.type ? task.type.title : this.$t('label.notChoosed');
+            return task.type ? task.type.title : this.$t("label.notChoosed");
           },
           show: true,
           editable: true,
           selectable: true,
           options: this.taskTypes,
           displayValue: "title",
-          optionValue: 'id',
-          optionLabel: 'title',
+          optionValue: "id",
+          optionLabel: "title",
           onSelect: (object, value) => {
             this.$store.dispatch("TaskStore/change", {
               stateSrc: "tasks",
@@ -165,7 +191,9 @@ export default {
           label: this.$t("label.executor"),
           align: "center",
           field: task => {
-              return task.executor ? Roles.getUserFullName(task.executor) : this.$t('label.notChoosed');
+            return task.executor
+              ? Roles.getUserFullName(task.executor)
+              : this.$t("label.notChoosed");
           },
           sortable: true,
           show: true
@@ -220,15 +248,18 @@ export default {
       return this.$store.state["TaskStore"].taskPriorities;
     },
     types: function() {
-        return this.$store.state['TaskStore'].taskTypes;
+      return this.$store.state["TaskStore"].taskTypes;
+    },
+    executors: function() {
+      return this.$store.state["TaskStore"].executors;
     },
     columnsComputed: function() {
-        const columns = this.columns;
-        const priorityColumn = columns[2];
-        const typeColumn = columns[3];
-        priorityColumn.options = this.priorities;
-        typeColumn.options = this.types;
-        return columns;
+      const columns = this.columns;
+      const priorityColumn = columns[2];
+      const typeColumn = columns[3];
+      priorityColumn.options = this.priorities;
+      typeColumn.options = this.types;
+      return columns;
     }
   },
   mounted() {
@@ -239,6 +270,30 @@ export default {
   methods: {
     addNewTask: function() {
       this.$store.dispatch("TaskStore/addNewTask");
+    },
+    filterFn: function(val, update, abort) {
+      const goSearch = val && val !== "";
+      if (goSearch) {
+        this.$store.dispatch("TaskStore/loadExecutors", val).then(() => {
+          update();
+        });
+      } else {
+        update();
+      }
+    },
+    abortFilterFn: function() {
+      // console.log('delayed filter aborted')
+    },
+    onExecutorSelected: function(object, value) {
+      this.$store.dispatch('TaskStore/change', {
+              stateSrc: "tasks",
+              data: object,
+              property: "executor",
+              value: value
+            });
+    },
+    check: function(val) {
+      console.log(val);
     }
   }
 };

@@ -25,7 +25,8 @@ export function change(state, changeData) {
         if (!elementInfo.element.originalValue) {
             elementInfo.element.originalValue = {};
         }
-        if (!elementInfo.element.originalValue[changeData.property]) {
+        const keyExistInOriginalValue = Object.keys(elementInfo.element.originalValue).includes(changeData.property);
+        if (!keyExistInOriginalValue) {
             elementInfo.element.originalValue[changeData.property] = elementInfo.element[changeData.property];
         }
         elementInfo.element[changeData.property] = changeData.value;
@@ -53,6 +54,10 @@ export function setChangedState(state, stateData) {
     }
 }
 
+export function updateElementId(state, updateData) {
+    updateData.object.id = updateData.newId;
+}
+
 export function save(state, saveData) {
     updateElementId(state, saveData);
     setChangedState(state, {
@@ -61,8 +66,12 @@ export function save(state, saveData) {
     })
 }
 
-export function updateElementId(state, updateData) {
-    updateData.object.id = updateData.newId;
+export function saveEx(state, saveData) {
+    saveData.object = Object.assign(saveData.object, saveData.newData);
+    setChangedState(state, {
+        object: saveData.object,
+        changed: false
+    })
 }
 
 export function remove(state, removeData) {
@@ -112,4 +121,9 @@ export function addTask(state, task) {
 
 export function setPriorities(state, priorities) {
     state.taskPriorities = priorities;
+}
+
+/* EXECUTOR */
+export function setExecutors(state, executors) {
+    state.executors = executors;
 }

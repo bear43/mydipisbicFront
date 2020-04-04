@@ -2,6 +2,7 @@ export default {
     tasks: [],
     taskPriorities: [],
     taskTypes: [],
+    executors: [],
     newId: -1,
     getNewId: function(stateSrc) {
         while(this[stateSrc].filter(obj => obj.id === this.newId).length !== 0) {

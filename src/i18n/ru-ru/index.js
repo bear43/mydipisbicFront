@@ -25,7 +25,8 @@ export default {
         priority: 'Приоритет',
         notChoosed: 'Не выбрано',
         type: 'Тип',
-        executor: 'Исполнитель'
+        executor: 'Исполнитель',
+        noResult: 'Нет результатов'
     },
     notify: {
         successfulSignIn: 'Успешный вход',

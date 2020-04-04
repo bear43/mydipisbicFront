@@ -96,9 +96,9 @@ export function saveTask(context, task) {
     axios
         .post('http://localhost:8080/tasks/save', task)
         .then(response => {
-            context.commit('save', {
+            context.commit('saveEx', {
                 object: task,
-                newId: response.data
+                newData: response.data
             });
         });
 }
@@ -109,6 +109,22 @@ export function loadPriorities(context) {
          .then(response => {
              context.commit('setPriorities', response.data);
          });
+}
+
+/* EXECUTORS */
+export async function loadExecutors(context, executorString) {
+    return axios.get('http://localhost:8080/users/executors/search', {
+        params: {
+            fullName: executorString
+        }
+    })
+         .then(response => {
+             context.commit('setExecutors', response.data);
+         });
+}
+
+export function resetExecutors(context) {
+    context.commit('setExecutors', []);
 }
 
 /* COMMON */
