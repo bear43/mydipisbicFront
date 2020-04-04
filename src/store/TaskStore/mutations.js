@@ -127,3 +127,13 @@ export function setPriorities(state, priorities) {
 export function setExecutors(state, executors) {
     state.executors = executors;
 }
+
+/* STATUS */
+export function setStatuses(state, statuses) {
+    state.statuses = statuses;
+}
+
+/* Executors Task */
+export function setExecutorsTasks(state, executorTasks) {
+    state.executorsTasks = executorTasks;
+}

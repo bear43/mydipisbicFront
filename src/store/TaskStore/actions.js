@@ -53,7 +53,7 @@ export function addNewTaskType(context) {
 /* TASK */
 
 export function loadTasks(context) {
-    axios.get('http://localhost:8080/tasks/get')
+    axios.get('http://localhost:8080/tasks/get-users')
          .then(response => {
              context.commit('setTasks', response.data);
          });
@@ -103,6 +103,18 @@ export function saveTask(context, task) {
         });
 }
 
+/* EXECUTOR TASK */
+export async function loadExecutorsTasks(context, filter) {
+    return axios
+        .get('http://localhost:8080/tasks/executors/search', {
+            params: filter
+        })
+        .then(
+            response => {
+                context.commit('setExecutorsTasks', response.data);
+            });
+}
+
 /* PRIORITIES */
 export function loadPriorities(context) {
     axios.get('http://localhost:8080/tasks/priorities/get')
@@ -125,6 +137,14 @@ export async function loadExecutors(context, executorString) {
 
 export function resetExecutors(context) {
     context.commit('setExecutors', []);
+}
+
+/* STATUS */
+export function loadStatuses(context) {
+    axios.get('http://localhost:8080/tasks/statuses/get')
+    .then(response => {
+        context.commit('setStatuses', response.data);
+    });
 }
 
 /* COMMON */
