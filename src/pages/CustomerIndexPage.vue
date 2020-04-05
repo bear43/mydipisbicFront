@@ -12,6 +12,71 @@
     >
       <template v-slot:top>
         <!-- <q-btn color="primary" :label="$t('label.add')" @click="addNewTask()" /> -->
+        <q-input
+          class="fit q-mb-lg"
+          square
+          filled
+          :value="filter.title"
+          :label="$t('label.title')"
+          clearable
+          @input="onChangeFilter('title', $event)"
+        />
+        <q-select
+          class="fit q-mb-lg"
+          square
+          filled
+          clearable
+          option-value="key"
+          option-label="value"
+          :value="filter.status"
+          :options="statuses"
+          :label="$t('label.status')"
+          @input="onChangeFilter('status', $event)"
+        />
+        <q-select
+          class="fit q-mb-lg"
+          square
+          filled
+          clearable
+          option-value="key"
+          option-label="value"
+          :value="filter.priority"
+          :options="priorities"
+          :label="$t('label.priority')"
+          @input="onChangeFilter('priority', $event)"
+        />
+        <q-select
+          class="fit q-mb-lg"
+          square
+          filled
+          clearable
+          option-value="id"
+          option-label="title"
+          :value="filter.type"
+          :options="types"
+          :label="$t('label.type')"
+          @input="onChangeFilter('type', $event)"
+        />
+        <q-select
+          class="fit q-mb-lg"
+          square
+          filled
+          clearable
+          :value="filter.customer"
+          use-input
+          :label="$t('label.customer')"
+          :options="customers"
+          @filter="filterFn"
+          @filter-abort="abortFilterFn"
+          @input="onChangeFilter('customer', $event)"
+          :option-label="item => item.lastName + ' ' + item.firstName + ' ' + item.secondName + '. Кабинет: ' + item.cabinet"
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">{{$t('label.noResult')}}</q-item-section>
+            </q-item>
+          </template>
+        </q-select>
       </template>
       <template v-slot:header="props">
         <q-tr>
@@ -29,7 +94,7 @@
             v-for="column in props.cols"
             :key="column.name"
             :class="'text-' + column.align"
-            v-bind:column="column"
+            :column="column"
           >
             <div v-if="column.special">
               <q-btn
@@ -40,29 +105,6 @@
         data: props.row
       }) && column.showOnChanged)"
               />
-            </div>
-            <div v-else-if="column.name==='executor'">
-              {{props.row.executor ? props.row.executor.lastName + ' ' + props.row.executor.firstName + ' ' + props.row.executor.secondName : $t('label.notChoosed') }}
-              <q-popup-edit :value="props.row.executor">
-                <q-select
-                  filled
-                  :value="props.row.executor"
-                  use-chips
-                  use-input
-                  :label="$t('label.executor')"
-                  :options="executors"
-                  @filter="filterFn"
-                  @filter-abort="abortFilterFn"
-                  @input="onExecutorSelected(props.row, $event)"
-                  :option-label="item => item.lastName + ' ' + item.firstName + ' ' + item.secondName + '. Кабинет: ' + item.cabinet"
-                >
-                  <template v-slot:no-option>
-                    <q-item>
-                      <q-item-section class="text-grey">{{$t('label.noResult')}}</q-item-section>
-                    </q-item>
-                  </template>
-                </q-select>
-              </q-popup-edit>
             </div>
             <div v-else>{{ column.value }}</div>
             <q-popup-edit :value="column.value" v-if="column.editable">
@@ -110,22 +152,29 @@ export default {
         rowsPerPage: 10,
         rowsNumber: 10
       },
+      filter: {
+        status: null,
+        title: null,
+        priority: null,
+        type: null,
+        customer: null
+      },
       executor: null,
       columns: [
-        {
-          name: "remove",
-          required: true,
-          label: this.$t("label.remove"),
-          align: "center",
-          sortable: false,
-          headerStyle: "width: 50px",
-          show: true,
-          special: true,
-          field: taskType => taskType,
-          handler: item => {
-            this.$store.dispatch("TaskStore/removeTask", item);
-          }
-        },
+        // {
+        //   name: "remove",
+        //   required: true,
+        //   label: this.$t("label.remove"),
+        //   align: "center",
+        //   sortable: false,
+        //   headerStyle: "width: 50px",
+        //   show: true,
+        //   special: true,
+        //   field: taskType => taskType,
+        //   handler: item => {
+        //     this.$store.dispatch("TaskStore/removeTask", item);
+        //   }
+        // },
         {
           name: "title",
           required: true,
@@ -143,6 +192,16 @@ export default {
               value: event.target.value
             });
           }
+        },
+        {
+          name: "status",
+          required: true,
+          label: this.$t("label.status"),
+          align: "center",
+          field: item =>
+            item.status ? item.status.value : this.$t("label.undefined"),
+          sortable: true,
+          shiw: true
         },
         {
           name: "priority",
@@ -197,13 +256,13 @@ export default {
           }
         },
         {
-          name: "executor",
+          name: "customer",
           required: true,
-          label: this.$t("label.executor"),
+          label: this.$t("label.customer"),
           align: "center",
           field: task => {
-            return task.executor
-              ? Roles.getUserFullName(task.executor)
+            return task.customer
+              ? Roles.getUserFullName(task.customer)
               : this.$t("label.notChoosed");
           },
           sortable: true,
@@ -261,8 +320,11 @@ export default {
     types: function() {
       return this.$store.state["TaskStore"].taskTypes;
     },
-    executors: function() {
-      return this.$store.state["TaskStore"].executors;
+    customers: function() {
+      return this.$store.state["TaskStore"].customers;
+    },
+    statuses: function() {
+      return this.$store.state["TaskStore"].statuses;
     },
     columnsComputed: function() {
       const columns = this.columns;
@@ -271,19 +333,24 @@ export default {
       priorityColumn.options = this.priorities;
       typeColumn.options = this.types;
       return columns;
+    },
+    totalRows: function() {
+      return this.$store.state["TaskStore"].page.total;
     }
   },
   mounted() {
     this.loading = true;
     this.$store.dispatch("TaskStore/loadTaskTypes");
     this.$store.dispatch("TaskStore/loadPriorities");
+    this.$store.dispatch("TaskStore/loadStatuses");
     this.$store
       .dispatch("TaskStore/loadExecutorsTasks", {
         start: 0,
-        limit: 10
+        limit: this.pagination.rowsPerPage
       })
       .then(() => {
         this.loading = false;
+        this.pagination.rowsNumber = this.totalRows;
       });
   },
   methods: {
@@ -293,7 +360,7 @@ export default {
     filterFn: function(val, update, abort) {
       const goSearch = val && val !== "";
       if (goSearch) {
-        this.$store.dispatch("TaskStore/loadExecutors", val).then(() => {
+        this.$store.dispatch("TaskStore/loadCustomers", val).then(() => {
           update();
         });
       } else {
@@ -303,26 +370,42 @@ export default {
     abortFilterFn: function() {
       // console.log('delayed filter aborted')
     },
-    onExecutorSelected: function(object, value) {
-      this.$store.dispatch("TaskStore/change", {
-        stateSrc: "tasks",
-        data: object,
-        property: "executor",
-        value: value
+    onChangeFilter: function(property, value) {
+      this.filter[property] = value;
+      this.loading = true;
+      const priority = this.filter.priority;
+      const status = this.filter.status;
+      const customer = this.filter.customer;
+      const type = this.filter.type;
+      this.$store
+      .dispatch("TaskStore/loadExecutorsTasks", {
+        start: 0,
+        limit: this.pagination.rowsPerPage,
+        title: this.filter.title,
+        priority: priority ? priority.key : null,
+        status: status ? status.key : null,
+        customer: customer ? customer.id : null,
+        type: type ? type.id : null
+      })
+      .then(() => {
+        this.loading = false;
+        this.pagination.rowsNumber = this.totalRows;
       });
-    },
-    check: function(val) {
-      console.log(val);
     },
     request: function(reuqestProp) {
       console.log(reuqestProp);
       this.loading = true;
-      this.$store.dispatch("TaskStore/loadExecutorsTasks", {
-          start: 0,
-          limit: 10
+      this.$store
+        .dispatch("TaskStore/loadExecutorsTasks", {
+          start:
+            reuqestProp.pagination.rowsPerPage *
+            (reuqestProp.pagination.page - 1),
+          limit: reuqestProp.pagination.rowsPerPage
         })
         .then(() => {
           this.loading = false;
+          this.pagination = reuqestProp.pagination;
+          this.pagination.rowsNumber = this.totalRows;
         });
     }
   }

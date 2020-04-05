@@ -26,7 +26,10 @@ export default {
         notChoosed: 'Не выбрано',
         type: 'Тип',
         executor: 'Исполнитель',
-        noResult: 'Нет результатов'
+        noResult: 'Нет результатов',
+        status: 'Статус',
+        undefined: 'Неопредлено',
+        customer: 'Заказчик'
     },
     notify: {
         successfulSignIn: 'Успешный вход',

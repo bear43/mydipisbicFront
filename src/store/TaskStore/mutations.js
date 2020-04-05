@@ -128,6 +128,11 @@ export function setExecutors(state, executors) {
     state.executors = executors;
 }
 
+/* CUSTOMER */
+export function setCustomers(state, customers) {
+    state.customers = customers;
+}
+
 /* STATUS */
 export function setStatuses(state, statuses) {
     state.statuses = statuses;
@@ -135,5 +140,6 @@ export function setStatuses(state, statuses) {
 
 /* Executors Task */
 export function setExecutorsTasks(state, executorTasks) {
-    state.executorsTasks = executorTasks;
+    state.page.total = executorTasks.total;
+    state.tasks = executorTasks.result;
 }
