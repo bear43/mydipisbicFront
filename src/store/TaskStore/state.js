@@ -6,7 +6,9 @@ export default {
     statuses: [],
     executorsTasks: [],
     customers: [],
-    page: {},
+    page: {
+        total: 0
+    },
     newId: -1,
     getNewId: function(stateSrc) {
         while(this[stateSrc].filter(obj => obj.id === this.newId).length !== 0) {

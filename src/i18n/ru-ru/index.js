@@ -29,7 +29,13 @@ export default {
         noResult: 'Нет результатов',
         status: 'Статус',
         undefined: 'Неопредлено',
-        customer: 'Заказчик'
+        customer: 'Заказчик',
+        done: 'Выполнено',
+        reject: 'Отклонить',
+        add: 'Добавить',
+        take: 'Взять',
+        apply: 'Применить',
+        cancel: 'Отменить'
     },
     notify: {
         successfulSignIn: 'Успешный вход',
@@ -39,5 +45,10 @@ export default {
     error: {
         emptyField: 'Поле не может быть пустым',
         wrongEmail: 'Неверный формат почты'
+    },
+    text: {
+        rejected: 'Отклонена с причиной',
+        startDate: 'Дата начала',
+        endDate: 'Дата окончания'
     }
 }

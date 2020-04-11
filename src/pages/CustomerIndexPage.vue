@@ -67,7 +67,6 @@
           :label="$t('label.customer')"
           :options="customers"
           @filter="filterFn"
-          @filter-abort="abortFilterFn"
           @input="onChangeFilter('customer', $event)"
           :option-label="item => item.lastName + ' ' + item.firstName + ' ' + item.secondName + '. Кабинет: ' + item.cabinet"
         >
@@ -80,6 +79,7 @@
       </template>
       <template v-slot:header="props">
         <q-tr>
+          <q-th auto-width />
           <q-th
             v-for="column in props.cols"
             :key="column.name"
@@ -90,6 +90,16 @@
       </template>
       <template v-slot:body="props">
         <q-tr>
+          <q-td auto-width>
+            <q-btn
+              size="sm"
+              color="accent"
+              round
+              dense
+              @click="props.expand = !props.expand"
+              :icon="props.expand ? 'remove' : 'add'"
+            />
+          </q-td>
           <q-td
             v-for="column in props.cols"
             :key="column.name"
@@ -131,8 +141,91 @@
             </q-popup-edit>
           </q-td>
         </q-tr>
+        <q-tr v-show="props.expand" :props="props">
+          <q-td colspan="100%">
+            <div v-if="props.row.status && props.row.status.key === 'REJECTED'">
+              {{$t('text.rejected') + ': ' + props.row.rejectReason}}
+            </div>
+            <div v-else-if="props.row.status && props.row.status.key === 'DONE'">
+              {{props.row.doneMsg}}
+            </div>
+            <div v-if="props.row.startDate">
+              {{$t('text.startDate') + ': ' + props.row.startDate}}
+            </div>
+            <div v-if="props.row.doneDate">
+              {{$t('text.endDate') + ': ' + props.row.doneDate}}
+            </div>
+            <q-btn
+              class="q-ml-xs"
+              color="red"
+              :label="$t('label.reject')"
+              v-if="props.row.status && props.row.status.key !== 'DONE' && props.row.status.key !== 'REJECTED'"
+              @click="rejectTask(props.row)"
+            />
+            <q-btn
+              class="q-ml-md"
+              color="primary"
+              :label="$t('label.take')"
+              v-if="props.row.status && props.row.status.key === 'PENDING' || props.row.status.key === 'REJECTED'"
+              @click="takeTask(props.row)"
+            />
+            <q-btn
+              class="q-ml-md"
+              color="green"
+              :label="$t('label.done')"
+              v-if="props.row.status && props.row.status.key === 'PROCESSING'"
+              @click="doneTask(props.row)"
+            />
+          </q-td>
+        </q-tr>
       </template>
     </q-table>
+    <q-dialog v-model="rejectDialog.show" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">{{$t('label.reject')}}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            dense
+            :value="rejectDialog.object ? rejectDialog.object.rejectReason : null"
+            autofocus
+            @keyup.enter="rejectDialog.show = false"
+            type="textarea"
+            @input="onChangeRejectReason(rejectDialog.object, $event)"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat :label="$t('label.cancel')" v-close-popup />
+          <q-btn flat :label="$t('label.apply')" v-close-popup @click="applyRejectTask()" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="doneDialog.show" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">{{$t('label.done')}}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            dense
+            :value="doneDialog.object ? doneDialog.object.doneMsg : null"
+            autofocus
+            @keyup.enter="doneDialog.show = false"
+            type="textarea"
+            @input="onChangeDoneMsg(doneDialog.object, $event)"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right" class="text-primary">
+          <q-btn flat :label="$t('label.cancel')" v-close-popup />
+          <q-btn flat :label="$t('label.apply')" v-close-popup @click="applyDoneTask()" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -144,6 +237,14 @@ export default {
   name: "PageTaskType",
   data() {
     return {
+      doneDialog: {
+        show: false,
+        object: null
+      },
+      rejectDialog: {
+        show: false,
+        object: null
+      },
       loading: false,
       pagination: {
         sortBy: "desc",
@@ -162,17 +263,17 @@ export default {
       executor: null,
       columns: [
         // {
-        //   name: "remove",
+        //   name: "not_interested",
         //   required: true,
-        //   label: this.$t("label.remove"),
+        //   label: this.$t("label.reject"),
         //   align: "center",
         //   sortable: false,
         //   headerStyle: "width: 50px",
         //   show: true,
         //   special: true,
-        //   field: taskType => taskType,
+        //   field: task => task,
         //   handler: item => {
-        //     this.$store.dispatch("TaskStore/removeTask", item);
+        //     this.rejectTask(item);
         //   }
         // },
         {
@@ -269,9 +370,9 @@ export default {
           show: true
         }
         // {
-        //   name: "refresh",
-        //   required: true,
-        //   label: this.$t("label.reset"),
+        //   name: "add",
+        //   required: false,
+        //   label: this.$t("label.take"),
         //   align: "center",
         //   sortable: false,
         //   headerStyle: "width: 50px",
@@ -279,25 +380,22 @@ export default {
         //   special: true,
         //   field: taskType => taskType,
         //   handler: item => {
-        //     this.$store.dispatch("TaskStore/reset", {
-        //       stateSrc: "tasks",
-        //       data: item
-        //     });
+        //     this.takeTask(item);
         //   },
         //   showOnChanged: true
         // },
         // {
-        //   name: "save",
+        //   name: "done",
         //   required: true,
-        //   label: this.$t("label.save"),
+        //   label: this.$t("label.done"),
         //   align: "center",
         //   sortable: false,
         //   headerStyle: "width: 50px",
-        //   show: false,
+        //   show: true,
         //   special: true,
         //   field: taskType => taskType,
         //   handler: item => {
-        //     this.$store.dispatch("TaskStore/saveTask", item);
+        //     this.doneTask(item);
         //   },
         //   showOnChanged: true
         // }
@@ -339,21 +437,34 @@ export default {
     }
   },
   mounted() {
-    this.loading = true;
     this.$store.dispatch("TaskStore/loadTaskTypes");
     this.$store.dispatch("TaskStore/loadPriorities");
     this.$store.dispatch("TaskStore/loadStatuses");
-    this.$store
-      .dispatch("TaskStore/loadExecutorsTasks", {
-        start: 0,
-        limit: this.pagination.rowsPerPage
-      })
-      .then(() => {
-        this.loading = false;
-        this.pagination.rowsNumber = this.totalRows;
-      });
+    this.loadTasks();
   },
   methods: {
+    loadTasks: function() {
+      this.loading = true;
+      const priority = this.filter.priority;
+      const status = this.filter.status;
+      const customer = this.filter.customer;
+      const type = this.filter.type;
+      this.$store
+        .dispatch("TaskStore/loadExecutorsTasks", {
+          start: this.pagination.rowsPerPage *
+            (this.pagination.page - 1),
+          limit: this.pagination.rowsPerPage,
+          title: this.filter.title,
+          priority: priority ? priority.key : null,
+          status: status ? status.key : null,
+          customer: customer ? customer.id : null,
+          type: type ? type.id : null
+        })
+        .then(() => {
+          this.loading = false;
+          this.pagination.rowsNumber = this.totalRows;
+        });
+    },
     addNewTask: function() {
       this.$store.dispatch("TaskStore/addNewTask");
     },
@@ -367,46 +478,54 @@ export default {
         update();
       }
     },
-    abortFilterFn: function() {
-      // console.log('delayed filter aborted')
-    },
     onChangeFilter: function(property, value) {
       this.filter[property] = value;
-      this.loading = true;
-      const priority = this.filter.priority;
-      const status = this.filter.status;
-      const customer = this.filter.customer;
-      const type = this.filter.type;
-      this.$store
-      .dispatch("TaskStore/loadExecutorsTasks", {
-        start: 0,
-        limit: this.pagination.rowsPerPage,
-        title: this.filter.title,
-        priority: priority ? priority.key : null,
-        status: status ? status.key : null,
-        customer: customer ? customer.id : null,
-        type: type ? type.id : null
-      })
-      .then(() => {
-        this.loading = false;
-        this.pagination.rowsNumber = this.totalRows;
-      });
+      this.loadTasks();
     },
     request: function(reuqestProp) {
-      console.log(reuqestProp);
-      this.loading = true;
+      this.pagination = reuqestProp.pagination;
+      this.loadTasks();
+    },
+    rejectTask: function(task) {
+      this.rejectDialog.object = task;
+      this.rejectDialog.show = true;
+    },
+    takeTask: function(task) {
+        this.$store.dispatch("TaskStore/takeTask", task).then(() => {
+        this.loadTasks();
+      });
+    },
+    doneTask: function(task) {
+      this.doneDialog.object = task;
+      this.doneDialog.show = true;
+    },
+    onChangeRejectReason: function(task, reason) {
+      this.$store.dispatch("TaskStore/change", {
+        stateSrc: "tasks",
+        data: task,
+        property: "rejectReason",
+        value: reason
+      });
+    },
+    onChangeDoneMsg: function(task, msg) {
+      this.$store.dispatch("TaskStore/change", {
+        stateSrc: "tasks",
+        data: task,
+        property: "doneMsg",
+        value: msg
+      });
+    },
+    applyRejectTask: function() {
       this.$store
-        .dispatch("TaskStore/loadExecutorsTasks", {
-          start:
-            reuqestProp.pagination.rowsPerPage *
-            (reuqestProp.pagination.page - 1),
-          limit: reuqestProp.pagination.rowsPerPage
-        })
+        .dispatch("TaskStore/rejectTask", this.rejectDialog.object)
         .then(() => {
-          this.loading = false;
-          this.pagination = reuqestProp.pagination;
-          this.pagination.rowsNumber = this.totalRows;
+          this.loadTasks();
         });
+    },
+    applyDoneTask: function() {
+      this.$store.dispatch("TaskStore/doneTask", this.doneDialog.object).then(() => {
+        this.loadTasks();
+      });
     }
   }
 };

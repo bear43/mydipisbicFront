@@ -33,6 +33,14 @@ export function change(state, changeData) {
     }
 }
 
+export function resetProperty(state, resetData) {
+    const element = resetData.data;
+    const propertyName = resetData.property;
+    if(element && element.originalValue && element.originalValue[propertyName] !== undefined) {
+        element[propertyName] = element.originalValue[propertyName];
+    }
+}
+
 export function reset(state, resetData) {
     const elementInfo = findElementInState(state, resetData);
     if(elementInfo.index !== -1) {

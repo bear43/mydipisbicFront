@@ -129,6 +129,65 @@ export async function loadExecutorsTasks(context, filter) {
             });
 }
 
+export async function rejectTask(context, task) {
+    if(task) {
+        return axios
+        .post('http://localhost:8080/tasks/executors/reject', {
+            id: task.id,
+            rejectReason: task.rejectReason
+        })
+        .then(response => {
+            context.commit('saveEx', {
+                object: task,
+                newData: response.data
+            });
+        })
+        .catch(error => {
+            context.commit('resetProperty', {
+                data: task,
+                property: 'rejectReason'
+            });
+        });
+    }
+}
+
+export async function doneTask(context, task) {
+    if(task) {
+        return axios
+        .post('http://localhost:8080/tasks/executors/done', {
+            id: task.id,
+            doneMsg: task.doneMsg
+        })
+        .then(response => {
+            context.commit('saveEx', {
+                object: task,
+                newData: response.data
+            });
+        })
+        .catch(error => {
+            context.commit('resetProperty', {
+                data: task,
+                property: 'doneMsg'
+            });
+        });
+    }
+}
+
+export async function takeTask(context, task) {
+    if(task) {
+        return axios
+        .post('http://localhost:8080/tasks/executors/take', {
+            id: task.id
+        })
+        .then(response => {
+            context.commit('saveEx', {
+                object: task,
+                newData: response.data
+            });
+        });
+    }
+}
+
 /* PRIORITIES */
 export function loadPriorities(context) {
     axios.get('http://localhost:8080/tasks/priorities/get')
