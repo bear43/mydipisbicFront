@@ -35,7 +35,10 @@ export default {
         add: 'Добавить',
         take: 'Взять',
         apply: 'Применить',
-        cancel: 'Отменить'
+        cancel: 'Отменить',
+        id: 'Идентификатор',
+        info: 'Информация',
+        close: 'Закрыть'
     },
     notify: {
         successfulSignIn: 'Успешный вход',
@@ -48,7 +51,8 @@ export default {
     },
     text: {
         rejected: 'Отклонена с причиной',
+        done: 'Выполнена',
         startDate: 'Дата начала',
-        endDate: 'Дата окончания'
+        doneDate: 'Дата окончания'
     }
 }

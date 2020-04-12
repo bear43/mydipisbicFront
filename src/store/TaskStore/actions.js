@@ -58,8 +58,10 @@ export function addNewTaskType(context) {
 
 /* TASK */
 
-export function loadTasks(context) {
-    axios.get('http://localhost:8080/tasks/get-users')
+export function loadTasks(context, filter) {
+    axios.get('http://localhost:8080/tasks/users/search', {
+        params: filter
+    })
         .then(response => {
             if (response) {
                 context.commit('setTasks', response.data);

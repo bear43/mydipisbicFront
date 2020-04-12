@@ -12,6 +12,20 @@
     >
       <template v-slot:top>
         <!-- <q-btn color="primary" :label="$t('label.add')" @click="addNewTask()" /> -->
+        <div class="text-h5 q-mt-lg q-mb-lg q-ml-sm">
+          {{$t('label.tasks')}}
+        </div>
+        <q-input
+          class="fit q-mb-lg"
+          square
+          filled
+          :value="filter.id"
+          :label="$t('label.id')"
+          clearable
+          reverse-fill-mask
+          mask="#"
+          @input="onChangeFilter('id', $event)"
+        />
         <q-input
           class="fit q-mb-lg"
           square
@@ -143,18 +157,14 @@
         </q-tr>
         <q-tr v-show="props.expand" :props="props">
           <q-td colspan="100%">
-            <div v-if="props.row.status && props.row.status.key === 'REJECTED'">
-              {{$t('text.rejected') + ': ' + props.row.rejectReason}}
-            </div>
-            <div v-else-if="props.row.status && props.row.status.key === 'DONE'">
-              {{props.row.doneMsg}}
-            </div>
-            <div v-if="props.row.startDate">
-              {{$t('text.startDate') + ': ' + props.row.startDate}}
-            </div>
-            <div v-if="props.row.doneDate">
-              {{$t('text.endDate') + ': ' + props.row.doneDate}}
-            </div>
+            <div
+              v-if="props.row.status && props.row.status.key === 'REJECTED'"
+            >{{$t('text.rejected') + ': ' + props.row.rejectReason}}</div>
+            <div
+              v-else-if="props.row.status && props.row.status.key === 'DONE'"
+            >{{props.row.doneMsg}}</div>
+            <div v-if="props.row.startDate">{{$t('text.startDate') + ': ' + props.row.startDate}}</div>
+            <div v-if="props.row.doneDate">{{$t('text.doneDate') + ': ' + props.row.doneDate}}</div>
             <q-btn
               class="q-ml-xs"
               color="red"
@@ -254,6 +264,7 @@ export default {
         rowsNumber: 10
       },
       filter: {
+        id: null,
         status: null,
         title: null,
         priority: null,
@@ -277,22 +288,22 @@ export default {
         //   }
         // },
         {
+          name: "id",
+          required: true,
+          label: this.$t("label.id"),
+          align: "center",
+          field: "id",
+          sortable: true,
+          show: true
+        },
+        {
           name: "title",
           required: true,
           label: this.$t("label.title"),
           align: "center",
           field: "title",
           sortable: true,
-          show: true,
-          //editable: true,
-          onChange: (value, event) => {
-            this.$store.dispatch("TaskStore/change", {
-              stateSrc: "tasks",
-              data: value,
-              property: "title",
-              value: event.target.value
-            });
-          }
+          show: true
         },
         {
           name: "status",
@@ -302,7 +313,7 @@ export default {
           field: item =>
             item.status ? item.status.value : this.$t("label.undefined"),
           sortable: true,
-          shiw: true
+          show: true
         },
         {
           name: "priority",
@@ -315,21 +326,7 @@ export default {
               ? task.priority.value
               : this.$t("label.notChoosed");
           },
-          show: true,
-          //editable: true,
-          //selectable: true,
-          //options: this.priorities,
-          //displayValue: "value",
-          //optionValue: "key",
-          //optionLabel: "value",
-          onSelect: (object, value) => {
-            this.$store.dispatch("TaskStore/change", {
-              stateSrc: "tasks",
-              data: object,
-              property: "priority",
-              value: value
-            });
-          }
+          show: true
         },
         {
           name: "type",
@@ -339,21 +336,6 @@ export default {
           sortable: true,
           field: task => {
             return task.type ? task.type.title : this.$t("label.notChoosed");
-          },
-          show: true,
-          //editable: true,
-          //selectable: true,
-          //options: this.taskTypes,
-          //displayValue: "title",
-          //optionValue: "id",
-          //optionLabel: "title",
-          onSelect: (object, value) => {
-            this.$store.dispatch("TaskStore/change", {
-              stateSrc: "tasks",
-              data: object,
-              property: "type",
-              value: value
-            });
           }
         },
         {
@@ -369,36 +351,6 @@ export default {
           sortable: true,
           show: true
         }
-        // {
-        //   name: "add",
-        //   required: false,
-        //   label: this.$t("label.take"),
-        //   align: "center",
-        //   sortable: false,
-        //   headerStyle: "width: 50px",
-        //   show: false,
-        //   special: true,
-        //   field: taskType => taskType,
-        //   handler: item => {
-        //     this.takeTask(item);
-        //   },
-        //   showOnChanged: true
-        // },
-        // {
-        //   name: "done",
-        //   required: true,
-        //   label: this.$t("label.done"),
-        //   align: "center",
-        //   sortable: false,
-        //   headerStyle: "width: 50px",
-        //   show: true,
-        //   special: true,
-        //   field: taskType => taskType,
-        //   handler: item => {
-        //     this.doneTask(item);
-        //   },
-        //   showOnChanged: true
-        // }
       ]
     };
   },
@@ -451,9 +403,9 @@ export default {
       const type = this.filter.type;
       this.$store
         .dispatch("TaskStore/loadExecutorsTasks", {
-          start: this.pagination.rowsPerPage *
-            (this.pagination.page - 1),
+          start: this.pagination.rowsPerPage * (this.pagination.page - 1),
           limit: this.pagination.rowsPerPage,
+          id: this.filter.id,
           title: this.filter.title,
           priority: priority ? priority.key : null,
           status: status ? status.key : null,
@@ -491,7 +443,7 @@ export default {
       this.rejectDialog.show = true;
     },
     takeTask: function(task) {
-        this.$store.dispatch("TaskStore/takeTask", task).then(() => {
+      this.$store.dispatch("TaskStore/takeTask", task).then(() => {
         this.loadTasks();
       });
     },
@@ -523,9 +475,11 @@ export default {
         });
     },
     applyDoneTask: function() {
-      this.$store.dispatch("TaskStore/doneTask", this.doneDialog.object).then(() => {
-        this.loadTasks();
-      });
+      this.$store
+        .dispatch("TaskStore/doneTask", this.doneDialog.object)
+        .then(() => {
+          this.loadTasks();
+        });
     }
   }
 };

@@ -109,9 +109,10 @@ export function addTaskType(state, taskType) {
 
 /* Task */
 
-export function setTasks(state, tasks) {
+export function setTasks(state, responseBody) {
     state.tasks = [];
-    tasks.forEach(task => {
+    state.page.total = responseBody.total;
+    responseBody.result.forEach(task => {
         addTask(state, task);
     });
 }
