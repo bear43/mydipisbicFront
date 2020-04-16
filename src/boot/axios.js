@@ -27,7 +27,10 @@ export default ({ router }) => {
 
   axios.interceptors.request.use(
     config => {
-      config.headers.Auth = Cookies.getCookie(Roles.AUTH_TOKEN_NAME);
+      const authHeader = Cookies.getCookie(Roles.AUTH_TOKEN_NAME);
+      if(authHeader) {
+        config.headers.Auth = authHeader
+      }
       return config;
     }
   );

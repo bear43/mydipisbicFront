@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import UserStore from './UserStore/index'
 import TaskStore from './TaskStore/index'
+import DialogStore from './DialogStore/index'
 
 // import example from './module-example'
 
@@ -20,7 +21,8 @@ export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
       UserStore,
-      TaskStore
+      TaskStore,
+      DialogStore
     },
 
     // enable strict mode (adds overhead!)
