@@ -24,3 +24,21 @@ export function setEditableProperty(state, data) {
 export function resetEditableUserByUser(state) {
   state.editableUser = Object.assign({}, state.user);
 }
+
+export function setUsers(state, data) {
+  state.users.total = data.total;
+  state.users.result = data.result;
+}
+
+export function setPagination(state, pagination) {
+  state.users.pagination = pagination;
+}
+
+export function setFilter(state, filter) {
+  state.users.filter = filter;
+}
+
+
+export function setRoles(state, roles) {
+  state.users.roles = roles;
+}

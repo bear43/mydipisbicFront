@@ -4,8 +4,8 @@ export default {
   name: 'Roles',
   Role: {
     ADMIN: 'ROLE_ADMIN',
-    CONSUMER: 'ROLE_CONSUMER',
-    SUPPLIER: 'ROLE_SUPPLIER'
+    EXECUTOR: 'ROLE_EXECUTOR',
+    USER: 'ROLE_USER'
   },
   AUTH_TOKEN_NAME: 'auth',
   getUser: function () {

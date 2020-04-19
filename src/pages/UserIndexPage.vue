@@ -471,9 +471,6 @@ export default {
         value: value
       });
     },
-    check: function(val) {
-      console.log(val);
-    },
     onRowClicked: function(evt, row) {
       if (row && row.status && row.status.key !== "PENDING") {
         this.infoDialog.object = row;

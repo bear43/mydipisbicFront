@@ -39,7 +39,20 @@ const routes = [
       component: () => import('../layouts/MainLayout.vue'),
       children: [
         { path: '', component: () => import('../pages/TaskType.vue') }
-      ]
+      ],
+      meta: {
+        admin: true
+      }
+    }, 
+    {
+      path: '/users',
+      component: () => import('../layouts/MainLayout.vue'),
+      children: [
+        { path: '', component: () => import('../pages/AdminUsersPage.vue') }
+      ],
+      meta: {
+        admin: true
+      }
     }
   ]
   

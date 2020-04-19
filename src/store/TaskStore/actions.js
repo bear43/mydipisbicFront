@@ -34,8 +34,8 @@ export function removeTaskType(context, taskType) {
     }
 }
 
-export function saveTaskType(context, taskType) {
-    axios
+export async function saveTaskType(context, taskType) {
+    return axios
         .post('http://localhost:8080/tasks/types/save', taskType)
         .then(response => {
             if (response) {

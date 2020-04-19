@@ -38,7 +38,14 @@ export default {
         cancel: 'Отменить',
         id: 'Идентификатор',
         info: 'Информация',
-        close: 'Закрыть'
+        close: 'Закрыть',
+        users: 'Пользователи',
+        fullName: 'Полное имя',
+        role: 'Роль',
+        addUser: 'Добавить пользователя',
+        editUser: 'Редактировать пользователя',
+        edit: 'Редактировать',
+        removeOrRestore: 'Удалить/Восстановить'
     },
     notify: {
         successfulSignIn: 'Успешный вход',
@@ -47,7 +54,8 @@ export default {
     },
     error: {
         emptyField: 'Поле не может быть пустым',
-        wrongEmail: 'Неверный формат почты'
+        wrongEmail: 'Неверный формат почты',
+        noPermission: 'Недостаточно прав'
     },
     text: {
         rejected: 'Отклонена с причиной',

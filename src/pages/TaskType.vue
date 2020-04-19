@@ -8,7 +8,10 @@
       separator="cell"
     >
       <template v-slot:top>
-        <q-btn color="primary" :label="$t('label.add')" @click="addNewType()" />
+        <div>
+          <div class="text-h5 q-mt-lg q-mb-lg q-ml-sm">{{$t('label.taskTypes')}}</div>
+          <q-btn color="primary" :label="$t('label.add')" @click="addNewType()" />
+        </div>
       </template>
       <template v-slot:header="props">
         <q-tr>
@@ -40,7 +43,13 @@
             </div>
             <div v-else>{{ column.value }}</div>
             <q-popup-edit :value="column.value" v-if="column.editable">
-              <q-input :value="column.value" @change="column.onChange(props.row, $event)" dense autofocus counter />
+              <q-input
+                :value="column.value"
+                @change="column.onChange(props.row, $event)"
+                dense
+                autofocus
+                counter
+              />
             </q-popup-edit>
           </q-td>
         </q-tr>
@@ -82,24 +91,24 @@ export default {
             this.$store.dispatch("TaskStore/change", {
               stateSrc: "taskTypes",
               data: value,
-              property: 'title',
+              property: "title",
               value: event.target.value
             });
           }
         },
         {
-          name: 'refresh',
+          name: "refresh",
           required: true,
-          label: this.$t('label.reset'),
-          align: 'center',
+          label: this.$t("label.reset"),
+          align: "center",
           sortable: false,
-          headerStyle: 'width: 50px',
+          headerStyle: "width: 50px",
           show: false,
           special: true,
           field: taskType => taskType,
           handler: item => {
-            this.$store.dispatch('TaskStore/reset', {
-              stateSrc: 'taskTypes',
+            this.$store.dispatch("TaskStore/reset", {
+              stateSrc: "taskTypes",
               data: item
             });
           },
@@ -116,7 +125,14 @@ export default {
           special: true,
           field: taskType => taskType,
           handler: item => {
-            this.$store.dispatch("TaskStore/saveTaskType", item);
+            this.$store.dispatch("TaskStore/saveTaskType", item).then(resp => {
+              this.$q.notify({
+                color: "green-4",
+                textColor: "white",
+                icon: "cloud_done",
+                message: this.$t("notify.successful")
+              });
+            });
           },
           showOnChanged: true
         }
@@ -128,8 +144,8 @@ export default {
       return this.$store.state["TaskStore"].taskTypes;
     },
     hasChanges: function(object) {
-      return this.$store.getters['TaskStore/hasChanges']({
-        stateSrc: 'taskTypes',
+      return this.$store.getters["TaskStore/hasChanges"]({
+        stateSrc: "taskTypes",
         data: object
       });
     }

@@ -74,6 +74,11 @@ export default {
               label: this.$t('label.taskTypes'),
               show: () => true,
               to: '/task-types'
+            },
+            {
+              label: this.$t('label.users'),
+              show: () => true,
+              to: '/users'
             }
           ]
         },

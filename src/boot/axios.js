@@ -15,6 +15,7 @@ function errorResponseHandler (_error, router) {
     Roles.logout()
     router.push('/login')
   }
+  return Promise.reject(error);
 }
 
 export default ({ router }) => {
