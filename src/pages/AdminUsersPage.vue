@@ -11,10 +11,76 @@
       @request="request"
     >
       <template v-slot:top>
-        <div>
-          <div class="text-h5 q-mt-lg q-mb-lg q-ml-sm">{{$t('label.users')}}</div>
-          <q-btn color="primary" :label="$t('label.add')" @click="addNewUser()" />
-        </div>
+        <div class="text-h5 q-mt-lg q-mb-lg q-ml-sm">{{$t('label.users')}}</div>
+        <q-input
+          class="fit q-mb-lg"
+          square
+          filled
+          :value="filter.id"
+          :label="$t('label.id')"
+          clearable
+          reverse-fill-mask
+          mask="#"
+          @input="onChangeFilter('id', $event)"
+        />
+        <q-input
+          class="fit q-mb-lg"
+          square
+          filled
+          :value="filter.username"
+          :label="$t('label.username')"
+          clearable
+          @input="onChangeFilter('username', $event)"
+        />
+        <q-select
+          class="fit q-mb-lg"
+          square
+          filled
+          clearable
+          option-value="key"
+          option-label="value"
+          :value="filter.role"
+          :options="roles"
+          :label="$t('label.role')"
+          @input="onChangeFilter('role', $event)"
+        />
+        <q-input
+          class="fit q-mb-lg"
+          square
+          filled
+          :value="filter.fullName"
+          :label="$t('label.fullName')"
+          clearable
+          @input="onChangeFilter('fullName', $event)"
+        />
+        <q-input
+          class="fit q-mb-lg"
+          square
+          filled
+          :value="filter.phone"
+          :label="$t('label.phone')"
+          clearable
+          @input="onChangeFilter('phone', $event)"
+        />
+        <q-input
+          class="fit q-mb-lg"
+          square
+          filled
+          :value="filter.cabinet"
+          :label="$t('label.cabinet')"
+          clearable
+          @input="onChangeFilter('cabinet', $event)"
+        />
+        <q-input
+          class="fit q-mb-lg"
+          square
+          filled
+          :value="filter.email"
+          :label="$t('label.email')"
+          clearable
+          @input="onChangeFilter('email', $event)"
+        />
+        <q-btn color="primary" :label="$t('label.add')" @click="addNewUser()" />
       </template>
       <!-- <template v-slot:header="props">
         <q-tr>
@@ -25,7 +91,7 @@
             :style="column.headerStyle"
           >{{column.label}}</q-th>
         </q-tr>
-      </template> -->
+      </template>-->
       <template v-slot:body="props">
         <q-tr @click="onRowClicked($event, props.row)">
           <q-td
@@ -153,7 +219,15 @@ export default {
         rowsPerPage: 10,
         rowsNumber: 0
       },
-      filter: {},
+      filter: {
+        id: null,
+        username: null,
+        role: null,
+        fullName: null,
+        phone: null,
+        cabinet: null,
+        email: null
+      },
       columns: [
         {
           name: "removeOrRestore",
@@ -166,14 +240,19 @@ export default {
           special: true,
           field: item => item,
           handler: item => {
-            this.$store.dispatch(item.removed ? 'UserStore/restore' : "UserStore/remove", item).then(resp => {
-              this.$q.notify({
-                color: "green-4",
-                textColor: "white",
-                icon: "cloud_done",
-                message: this.$t("notify.successful")
+            this.$store
+              .dispatch(
+                item.removed ? "UserStore/restore" : "UserStore/remove",
+                item
+              )
+              .then(resp => {
+                this.$q.notify({
+                  color: "green-4",
+                  textColor: "white",
+                  icon: "cloud_done",
+                  message: this.$t("notify.successful")
+                });
               });
-            });
           }
         },
         {
@@ -247,7 +326,7 @@ export default {
       return this.$store.state["UserStore"].users.roles;
     },
     thisUser: function() {
-      return this.$store.state['UserStore'].user;
+      return this.$store.state["UserStore"].user;
     }
   },
   mounted() {
@@ -280,7 +359,7 @@ export default {
         email: null,
         cabinet: null
       };
-      this.editDialog.title = this.$t('label.addUser');
+      this.editDialog.title = this.$t("label.addUser");
       this.editDialog.show = true;
     },
     saveUser: function() {
@@ -305,8 +384,12 @@ export default {
     },
     onRowClicked: function(evt, row) {
       this.editDialog.user = { ...row };
-      this.editDialog.title = this.$t('label.editUser');
+      this.editDialog.title = this.$t("label.editUser");
       this.editDialog.show = true;
+    },
+    onChangeFilter: function(property, value) {
+      this.filter[property] = value;
+      this.loadUsers();
     }
   }
 };

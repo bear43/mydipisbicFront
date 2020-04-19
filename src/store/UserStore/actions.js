@@ -33,11 +33,15 @@ export function setFilter(context, filter) {
 
 export async function loadUsers(context) {
   if (Roles.hasAnyRole(Roles.Role.ADMIN)) {
+    const filter = {
+      ...context.state.users.filter
+    };
+    filter.role = filter.role ? filter.role.key : null;
     const params = {
       start: (context.state.users.pagination.page - 1) * context.state.users.pagination.rowsPerPage,
       limit: context.state.users.pagination.rowsPerPage,
       ...context.state.users.pagination,
-      ...context.state.users.filter
+      ...filter
     };
     return axios.get('http://localhost:8080/users/search', {
       params: params
