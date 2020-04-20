@@ -45,7 +45,9 @@ export default {
         addUser: 'Добавить пользователя',
         editUser: 'Редактировать пользователя',
         edit: 'Редактировать',
-        removeOrRestore: 'Удалить/Восстановить'
+        removeOrRestore: 'Удалить/Восстановить',
+        freeTasks: 'Свободные задачи',
+        dialog: 'Диалог'
     },
     notify: {
         successfulSignIn: 'Успешный вход',

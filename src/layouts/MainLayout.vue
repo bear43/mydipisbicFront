@@ -63,6 +63,13 @@ export default {
       activeButton: null,
       buttons: [
         {
+          to: '/dialog',
+          label: this.$t("label.dialog"),
+          show: () => {
+            return true;
+          }
+        },
+        {
           to: null,
           label: this.$t("label.adminPanel"),
           show: () => {

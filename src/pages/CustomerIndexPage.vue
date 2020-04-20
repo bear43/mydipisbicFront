@@ -90,6 +90,7 @@
             </q-item>
           </template>
         </q-select>
+        <q-checkbox v-model="noExecutor" :label="$t('label.freeTasks')" @input="onFreeTask()" />
       </template>
       <template v-slot:header="props">
         <q-tr>
@@ -247,6 +248,7 @@ export default {
   name: "PageTaskType",
   data() {
     return {
+      noExecutor: false,
       doneDialog: {
         show: false,
         object: null
@@ -269,7 +271,8 @@ export default {
         title: null,
         priority: null,
         type: null,
-        customer: null
+        customer: null,
+        executor: null
       },
       executor: null,
       columns: [
@@ -410,6 +413,7 @@ export default {
           priority: priority ? priority.key : null,
           status: status ? status.key : null,
           customer: customer ? customer.id : null,
+          executor: this.filter.executor,
           type: type ? type.id : null
         })
         .then(() => {
@@ -480,6 +484,11 @@ export default {
         .then(() => {
           this.loadTasks();
         });
+    },
+    onFreeTask: function() {
+      console.log(this.noExecutor);
+      this.filter.executor = this.noExecutor ? -1 : null;
+      this.loadTasks();
     }
   }
 };
