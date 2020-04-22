@@ -47,7 +47,8 @@ export default {
         edit: 'Редактировать',
         removeOrRestore: 'Удалить/Восстановить',
         freeTasks: 'Свободные задачи',
-        dialog: 'Диалог'
+        dialog: 'Диалог',
+        recipients: 'Участники'
     },
     notify: {
         successfulSignIn: 'Успешный вход',

@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import UserStore from './UserStore/index'
 import TaskStore from './TaskStore/index'
 import DialogStore from './DialogStore/index'
+import MessageStore from './MessageStore/index'
 
 // import example from './module-example'
 
@@ -22,7 +23,8 @@ export default function (/* { ssrContext } */) {
     modules: {
       UserStore,
       TaskStore,
-      DialogStore
+      DialogStore,
+      MessageStore
     },
 
     // enable strict mode (adds overhead!)

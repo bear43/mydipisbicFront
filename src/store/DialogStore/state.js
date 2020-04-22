@@ -1,8 +1,7 @@
 export default function () {
   return {
-    currentDialog: null,
     dialogues: [],
-    total: null,
+    total: 0,
     pagination: {
       page: 0,
       limit: 10

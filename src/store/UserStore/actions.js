@@ -6,9 +6,9 @@ export function someAction (context) {
 import axios from 'axios'
 import Roles from '../../utils/roles'
 
-export function loadUser(context) {
+export async function loadUser(context) {
   if (Roles.getUser()) {
-    axios.post('http://localhost:8080/users/getCurrentUser')
+    return axios.post('http://localhost:8080/users/getCurrentUser')
       .then(function (resp) {
         context.commit('setUser', resp.data)
       })
@@ -94,4 +94,17 @@ export async function restore(context, user) {
         })
     }
   }
+}
+
+export async function loadUsersByString(context, string) {
+  return axios.get('http://localhost:8080/users/search-by-string', {
+      params: {
+          string: string
+      }
+  })
+      .then(response => {
+          if (response) {
+              return response.data;
+          }
+      });
 }

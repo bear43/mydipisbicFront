@@ -1,9 +1,10 @@
 export default function () {
   return {
-    currentMessage: null,
-    messages: null,
+    messages: [],
+    total: 0,
     pagination: {
-      total: null
+      page: 0,
+      limit: 10
     }
   }
 }

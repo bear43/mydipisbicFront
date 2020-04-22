@@ -5,23 +5,23 @@
 </template>
 
 <script>
-
-import Vuex from 'vuex'
-import Roles from './utils/roles'
+import Vuex from "vuex";
+import Roles from "./utils/roles";
 
 export default {
-  name: 'App',
+  name: "App",
 
   computed: {
-    ...Vuex.mapActions('UserStore', ['loadUser'])
+    ...Vuex.mapActions("UserStore", ["loadUser"])
   },
 
-  mounted () {
+  mounted() {
     try {
       if (Roles.getUser()) {
-        this.loadUser()
+        this.loadUser().then(() => {
+        });
       }
     } catch {}
   }
-}
+};
 </script>
