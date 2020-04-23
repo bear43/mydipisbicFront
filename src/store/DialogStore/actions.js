@@ -6,7 +6,6 @@ import axios from 'axios'
 
 function checkFunction(context) {
     if (!context.rootState.UserStore.user.id) {
-        debugger;
         setTimeout(() => {
             checkFunction(context);
         }, 100);
@@ -48,4 +47,8 @@ export async function getTotal(context) {
     }).then(response => {
         context.commit('setTotal', response.data.result);
     });
+}
+
+export function addDialog(context, dialog) {
+    context.commit('addDialog', dialog);
 }

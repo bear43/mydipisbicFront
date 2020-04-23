@@ -19,6 +19,9 @@ export default {
       }
     }
   },
+  getToken: function() {
+    return Cookies.getCookie(this.AUTH_TOKEN_NAME);
+  },
   getUserId: function () {
     return this.getUser().id
   },

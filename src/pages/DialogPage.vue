@@ -75,7 +75,12 @@
     <q-dialog v-model="newDialogDialog.show" persistent>
       <q-card style="min-width: 350px">
         <q-card-section>
-          <q-input dense v-model="newDialogDialog.object.title" autofocus :hint="$t('label.title')" />
+          <q-input
+            dense
+            v-model="newDialogDialog.object.title"
+            autofocus
+            :hint="$t('label.title')"
+          />
         </q-card-section>
         <q-card-section>
           <q-select
@@ -111,6 +116,17 @@
 import Roles from "../utils/roles";
 import WS from "../utils/ws";
 import roles from "../utils/roles";
+
+function WSConnection(store) {
+  if (!store.state["UserStore"].user.id) {
+    setInterval(() => { WSConnection(store); }, 100);
+  } else {
+    WS.start("http://localhost:8080/ws", roles.getToken()).then(() => {
+      WS.subscribe("/user/topic/dialogues");
+    });
+  }
+}
+
 export default {
   name: "PageDialog",
   data: function() {
@@ -126,17 +142,20 @@ export default {
         currentUser: {},
         users: []
       },
-      currentDialog: null
+      currentDialog: null,
+      currentDialogSubscription: null
     };
   },
   methods: {
     onSend: function() {
-      this.$store.dispatch('MessageStore/createMessage', {
-        dialogId: this.currentDialog,
-        content: this.text
-      }).then(() => {
-        this.text = "";
-      });
+      this.$store
+        .dispatch("MessageStore/createMessage", {
+          dialogId: this.currentDialog,
+          content: this.text
+        })
+        .then(() => {
+          this.text = "";
+        });
     },
     loadDialogues: function() {
       this.$store.dispatch("DialogStore/loadDialogues");
@@ -164,7 +183,6 @@ export default {
             message: this.$t("notify.successful")
           });
           this.newDialogDialog.show = false;
-          this.loadDialogues();
         });
     },
     getDialogues: function(from, size) {
@@ -213,8 +231,20 @@ export default {
     },
     onEnterUser: function(user) {},
     onDialogClick: function(dialogId) {
+      if(this.currentDialogSubscription) {
+        WS.unsubscribe(this.currentDialogSubscription);
+        this.currentDialogSubscription = null;
+      }
       this.currentDialog = dialogId;
+      this.$store.dispatch("MessageStore/resetMessages");
       this.loadMessages();
+      this.currentDialogSubscription = WS.subscribe('/topic/dialogues/' + dialogId + '/messages');
+    },
+    createDialogHandler: function(dialog) {
+      this.$store.dispatch('DialogStore/addDialog', dialog);
+    },
+    createMessageHandler: function(message) {
+      this.$store.dispatch('MessageStore/addMessage', message);
     }
   },
   computed: {
@@ -245,7 +275,9 @@ export default {
   },
   mounted() {
     this.loadDialogues();
-    //WS.start("http://localhost:8080/ws");
+    WS.regHandler("CREATE_DIALOG", this.createDialogHandler);
+    WS.regHandler("CREATE_MESSAGE", this.createMessageHandler);
+    WSConnection(this.$store);
   }
 };
 </script>

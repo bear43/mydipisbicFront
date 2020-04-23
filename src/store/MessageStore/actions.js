@@ -36,3 +36,11 @@ export async function getTotal(context, dialogId) {
         context.commit('setTotal', response.data.result);
     });
 }
+
+export function resetMessages(context) {
+    context.commit('resetMessages');
+}
+
+export function addMessage(context, message) {
+    context.commit('addMessage', message);
+}

@@ -18,14 +18,25 @@ export function evaluatePage(state) {
     if(pagesFromCurrentToLast > 0) {
         state.pagination.page++;
     } else {
-        state.messages = [];
-        state.total = 0;
-        state.pagination.page = 0;
+        resetMessages(state);
     }
 }
 
 export function setTotal(state, total) {
     if(total) {
         state.total = total;
+    }
+}
+
+export function resetMessages(state) {
+    state.messages = [];
+    state.total = 0;
+    state.pagination.page = 0;
+}
+
+export function addMessage(state, message) {
+    const obj = state.messages.filter(msg => msg.id === message.id);
+    if (obj.length === 0) {
+        state.messages.push(message);
     }
 }
