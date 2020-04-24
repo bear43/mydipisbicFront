@@ -16,7 +16,9 @@ export function setDialogues(state, dialogues) {
 export function evaluatePage(state) {
     const pagesFromCurrentToLast = (state.total - state.dialogues.length) / state.pagination.limit;
     if (pagesFromCurrentToLast > 0) {
-        state.pagination.page++;
+        if(state.pagination.page < Math.trunc((Number)(state.total) / (Number)(state.pagination.limit))) {
+            state.pagination.page++;
+        };
     } else {
         state.dialogues = [];
         state.total = 0;

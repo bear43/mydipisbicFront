@@ -4,8 +4,8 @@ export function someAction (context) {
 */
 import axios from 'axios'
 
-export function loadMessages(context, dialogId) {
-    axios.get('http://localhost:8080/messages/get', {
+export async function loadMessages(context, dialogId) {
+    return axios.get('http://localhost:8080/messages/get', {
         params: {
             dialogId: dialogId,
             ...context.state.pagination

@@ -23,43 +23,41 @@
         </div>
       </div>
       <div class="q-ma-md column items-center col-9">
-        <q-virtual-scroll
-          style="width: 100%; max-width: 40%; overflow-x: hidden"
-          :items-size="messagesLocalTotal"
-          :items-fn="getMessages"
-          :virtual-scroll-item-size="48"
-          @virtual-scroll="loadMoreMessages"
-          separator
+        <div
+          ref="scrollTarget"
+          class="q-pa-md"
+          style="max-height: 50vh; overflow: auto; width: 100%"
         >
-          <template v-slot="{ item, index }">
-            <q-chat-message
-              v-if="item.author.id === currentUser.id"
-              :name="item.author.lastName + ' ' + item.author.firstName + ' ' + item.author.secondName"
-              :text="[item.content]"
-              :key="index"
-              sent
-            />
-            <q-chat-message
-              v-else
-              :name="item.author.lastName + ' ' + item.author.firstName + ' ' + item.author.secondName"
-              :text="[item.content]"
-              :key="index"
-            />
-          </template>
-        </q-virtual-scroll>
-        <!-- <div style="width: 100%; max-width: 400px" v-for="message in messages" :key="message.id">
-          <q-chat-message
-            v-if="message.user.id === currentUser.id"
-            :name="message.user.lastName + ' ' + message.user.firstName + ' ' + message.user.secondName"
-            :text="[message.content]"
-            sent
-          />
-          <q-chat-message
-            v-else
-            :name="message.user.lastName + ' ' + message.user.firstName + ' ' + message.user.secondName"
-            :text="[message.content]"
-          />
-        </div>-->
+          <q-infinite-scroll
+            @load="loadMoreMessages"
+            :scroll-target="$refs.scrollTarget"
+            reverse
+            :offset="500"
+            ref="messageScroll"
+          >
+            <template slot="loading">
+              <div class="row justify-center q-my-md">
+                <q-spinner color="primary" name="dots" size="40px" />
+              </div>
+            </template>
+
+            <div v-for="(item, index) in getMessages()" :key="index" class="caption q-py-sm">
+              <q-chat-message
+                v-if="item.author.id === currentUser.id"
+                :name="item.author.lastName + ' ' + item.author.firstName + ' ' + item.author.secondName"
+                :text="[item.content]"
+                :key="index"
+                sent
+              />
+              <q-chat-message
+                v-else
+                :name="item.author.lastName + ' ' + item.author.firstName + ' ' + item.author.secondName"
+                :text="[item.content]"
+                :key="index"
+              />
+            </div>
+          </q-infinite-scroll>
+        </div>
         <div class="q-ma-md column items-center" style="width: 80%">
           <q-input
             style="width: 100%"
@@ -117,10 +115,15 @@ import Roles from "../utils/roles";
 import WS from "../utils/ws";
 import roles from "../utils/roles";
 
-function WSConnection(store) {
+function WSConnection(store, intervalToStop) {
   if (!store.state["UserStore"].user.id) {
-    setInterval(() => { WSConnection(store); }, 100);
+    let _intervalToStop = setInterval(() => {
+      WSConnection(store, _intervalToStop);
+    }, 100);
   } else {
+    if (intervalToStop) {
+      clearInterval(intervalToStop);
+    }
     WS.start("http://localhost:8080/ws", roles.getToken()).then(() => {
       WS.subscribe("/user/topic/dialogues");
     });
@@ -160,8 +163,11 @@ export default {
     loadDialogues: function() {
       this.$store.dispatch("DialogStore/loadDialogues");
     },
-    loadMessages: function() {
-      this.$store.dispatch("MessageStore/loadMessages", this.currentDialog);
+    loadMessages: async function() {
+      return this.$store.dispatch(
+        "MessageStore/loadMessages",
+        this.currentDialog
+      );
     },
     newDialog: function() {
       this.newDialogDialog.object = {
@@ -188,8 +194,8 @@ export default {
     getDialogues: function(from, size) {
       return this.dialogues;
     },
-    getMessages: function(from, size) {
-      return this.messages;
+    getMessages: function() {
+      return [...this.messages].reverse();
     },
     testify: function(d) {
       console.log(d);
@@ -205,15 +211,19 @@ export default {
         });
       }
     },
-    loadMoreMessages: function(details) {
-      if (details.index === details.to) {
-        this.$store.dispatch("MessageStore/getTotal").then(() => {
+    loadMoreMessages: function(index, done) {
+      this.$store
+        .dispatch("MessageStore/getTotal", this.currentDialog)
+        .then(() => {
           if (this.$store.getters["MessageStore/hasMessages"]) {
             this.$store.dispatch("MessageStore/evaluatePage");
-            this.loadMessages();
+            this.loadMessages().then(() => {
+              done();
+            });
+          } else {
+            done(true);
           }
         });
-      }
     },
     filterFn: function(val, update, abort) {
       const goSearch = val && val !== "";
@@ -231,20 +241,33 @@ export default {
     },
     onEnterUser: function(user) {},
     onDialogClick: function(dialogId) {
-      if(this.currentDialogSubscription) {
+      if (this.currentDialogSubscription) {
         WS.unsubscribe(this.currentDialogSubscription);
         this.currentDialogSubscription = null;
       }
       this.currentDialog = dialogId;
       this.$store.dispatch("MessageStore/resetMessages");
-      this.loadMessages();
-      this.currentDialogSubscription = WS.subscribe('/topic/dialogues/' + dialogId + '/messages');
+      this.loadMessages().then(() => {
+        //this.$refs.scrollTarget.setScrollPosition(this.$refs.scrollTarget.$el.scrollHeight, 1);
+        this.$refs.messageScroll.resume();
+        this.$refs.messageScroll.reset();
+        const objDiv = this.$refs.scrollTarget;
+        objDiv.scrollTop = objDiv.scrollHeight;
+      });
+      this.currentDialogSubscription = WS.subscribe(
+        "/topic/dialogues/" + dialogId + "/messages"
+      );
     },
     createDialogHandler: function(dialog) {
-      this.$store.dispatch('DialogStore/addDialog', dialog);
+      this.$store.dispatch("DialogStore/addDialog", dialog);
     },
     createMessageHandler: function(message) {
-      this.$store.dispatch('MessageStore/addMessage', message);
+      this.$store.dispatch("MessageStore/addMessage", message);
+      const interval = setInterval(() => {
+        const objDiv = this.$refs.scrollTarget;
+        objDiv.scrollTop = objDiv.scrollHeight;
+        clearInterval(interval);
+      }, 100);
     }
   },
   computed: {
