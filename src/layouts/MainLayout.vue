@@ -66,7 +66,7 @@ export default {
           to: '/dialog',
           label: this.$t("label.dialog"),
           show: () => {
-            return true;
+            return Roles.getUser();
           }
         },
         {

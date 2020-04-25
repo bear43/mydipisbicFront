@@ -25,10 +25,13 @@ export function subscribe(destination) {
 }
 
 export function unsubscribeBySub(subscription) {
-    const index = subscriptionMap.indexOf(subscription);
-    if (index !== -1) {
-        subscriptionMap.splice(index, 1);
-        stomp.unsubscribe(subscription);
+    let keys = Object.keys(subscriptionMap);
+    for(let key in keys) {
+        if(subscriptionMap[keys[key]].id === subscription.id) {
+            subscriptionMap[keys[key]].unsubscribe();
+            delete subscriptionMap[key];
+            break;
+        }
     }
 }
 
