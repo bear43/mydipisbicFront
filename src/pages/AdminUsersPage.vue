@@ -192,7 +192,7 @@
 
         <q-card-actions align="right" class="text-primary">
           <q-btn flat :label="$t('label.close')" v-close-popup />
-          <q-btn flat :label="$t('label.add')" @click="saveUser()" />
+          <q-btn flat :label="$t('label.submit')" @click="saveUser()" />
         </q-card-actions>
       </q-card>
     </q-dialog>

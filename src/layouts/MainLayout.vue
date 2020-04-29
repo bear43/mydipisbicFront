@@ -64,7 +64,7 @@ export default {
       buttons: [
         {
           to: '/dialog',
-          label: this.$t("label.dialog"),
+          label: this.$t("label.dialogs"),
           show: () => {
             return Roles.getUser();
           }

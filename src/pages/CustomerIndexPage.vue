@@ -12,9 +12,7 @@
     >
       <template v-slot:top>
         <!-- <q-btn color="primary" :label="$t('label.add')" @click="addNewTask()" /> -->
-        <div class="text-h5 q-mt-lg q-mb-lg q-ml-sm">
-          {{$t('label.tasks')}}
-        </div>
+        <div class="text-h5 q-mt-lg q-mb-lg q-ml-sm">{{$t('label.tasks')}}</div>
         <q-input
           class="fit q-mb-lg"
           square
@@ -120,6 +118,7 @@
             :key="column.name"
             :class="'text-' + column.align"
             :column="column"
+            @contextmenu.prevent="column.contextMenu ? column.contextMenu(props.row.customer) : null"
           >
             <div v-if="column.special">
               <q-btn
@@ -187,6 +186,13 @@
               v-if="props.row.status && props.row.status.key === 'PROCESSING'"
               @click="doneTask(props.row)"
             />
+            <!-- <q-btn
+              class="q-ml-md"
+              color="white"
+              text-color="black"
+              :label="$t('label.profile')"
+              @click="onProfileClick(props.row.customer)"
+            ></q-btn> -->
           </q-td>
         </q-tr>
       </template>
@@ -237,15 +243,22 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="profileDialog.show" persistent>
+      <q-card style="min-width: 350px">
+        <PageProfile :user="profileDialog.object" :closeFn="() => { profileDialog.show = false; }" />
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
 import Roles from "../utils/roles";
 import axios from "../boot/axios";
+import PageProfile from "./UserProfile.vue";
 
 export default {
   name: "PageTaskType",
+  components: { PageProfile },
   data() {
     return {
       noExecutor: false,
@@ -254,6 +267,10 @@ export default {
         object: null
       },
       rejectDialog: {
+        show: false,
+        object: null
+      },
+      profileDialog: {
         show: false,
         object: null
       },
@@ -351,6 +368,7 @@ export default {
               ? Roles.getUserFullName(task.customer)
               : this.$t("label.notChoosed");
           },
+          contextMenu: this.onProfileClick,
           sortable: true,
           show: true
         }
@@ -486,9 +504,12 @@ export default {
         });
     },
     onFreeTask: function() {
-      console.log(this.noExecutor);
       this.filter.executor = this.noExecutor ? -1 : null;
       this.loadTasks();
+    },
+    onProfileClick: function(user) {
+      this.profileDialog.object = user;
+      this.profileDialog.show = true;
     }
   }
 };

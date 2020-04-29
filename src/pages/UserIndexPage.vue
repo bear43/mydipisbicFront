@@ -123,7 +123,7 @@
       }) && column.showOnChanged)"
               />
             </div>
-            <div v-else-if="column.name==='executor'">
+            <div v-else-if="column.name==='executor'" @contextmenu.prevent="onProfileClick(props.row.executor)">
               {{props.row.executor ? props.row.executor.lastName + ' ' + props.row.executor.firstName + ' ' + props.row.executor.secondName : $t('label.notChoosed') }}
               <q-popup-edit
                 :value="props.row.executor"
@@ -205,20 +205,33 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="profileDialog.show" persistent>
+      <q-card style="min-width: 350px">
+        <PageProfile :user="profileDialog.object" :closeFn="() => { profileDialog.show = false; }" />
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
 import Roles from "../utils/roles";
 import axios from "../boot/axios";
+import PageProfile from "./UserProfile";
 
 export default {
   name: "PageTaskType",
+  components: {
+    PageProfile
+  },
   data() {
     return {
       infoDialog: {
         show: false,
         object: {}
+      },
+      profileDialog: {
+        show: false,
+        object: null
       },
       executor: null,
       customers: null,
@@ -476,6 +489,10 @@ export default {
         this.infoDialog.object = row;
         this.infoDialog.show = true;
       }
+    },
+    onProfileClick: function(user) {
+      this.profileDialog.object = user;
+      this.profileDialog.show = true;
     }
   }
 };
