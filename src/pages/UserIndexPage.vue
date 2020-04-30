@@ -123,7 +123,10 @@
       }) && column.showOnChanged)"
               />
             </div>
-            <div v-else-if="column.name==='executor'" @contextmenu.prevent="onProfileClick(props.row.executor)">
+            <div
+              v-else-if="column.name==='executor'"
+              @contextmenu.prevent="onProfileClick(props.row.executor)"
+            >
               {{props.row.executor ? props.row.executor.lastName + ' ' + props.row.executor.firstName + ' ' + props.row.executor.secondName : $t('label.notChoosed') }}
               <q-popup-edit
                 :value="props.row.executor"
@@ -200,6 +203,13 @@
           >{{$t('text.doneDate') + ': ' + infoDialog.object.doneDate}}</div>
         </q-card-section>
 
+        <q-card-section>
+          <div>
+          Оцените качество выполнения задачи:
+          <q-rating v-if="infoDialog.object && infoDialog.object.status ? infoDialog.object.status.key === 'DONE' : false" @click="onRateClick" v-model="ratingModel" size="2.0em" icon="thumb_up" />
+          </div>
+        </q-card-section>
+
         <q-card-actions align="right" class="text-primary">
           <q-btn flat :label="$t('label.close')" v-close-popup />
         </q-card-actions>
@@ -225,6 +235,7 @@ export default {
   },
   data() {
     return {
+      ratingModel: 0,
       infoDialog: {
         show: false,
         object: {}

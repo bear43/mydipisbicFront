@@ -51,7 +51,8 @@ export default {
         recipients: 'Участники',
         admin: 'Админ',
         profile: 'Профиль пользователя',
-        startDialog: 'Начать диалог'
+        startDialog: 'Начать новый диалог',
+        send: 'Отправить'
     },
     notify: {
         successfulSignIn: 'Успешный вход',

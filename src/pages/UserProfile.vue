@@ -51,7 +51,7 @@ export default {
       return Roles.getUserFullName(user);
     },
     onStartDialogClick: function() {
-      console.log("dialog");
+      this.$router.push({ path: `/dialog/${this.user.id}` });
     }
   }
 };

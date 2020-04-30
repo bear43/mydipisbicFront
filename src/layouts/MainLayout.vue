@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-toolbar-title>{{$t('label.siteTitle')}}</q-toolbar-title>
+        <q-toolbar-title @click="$router.push('/')">{{$t('label.siteTitle')}}</q-toolbar-title>
 
         <q-space />
         <div v-for="button in buttons" :key="button.value">

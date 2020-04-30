@@ -1,9 +1,9 @@
 <template>
-  <q-page class="flex flex-center">
+  <q-page class="">
       <q-form
       @submit="onSubmit"
       @reset="onReset"
-      class="q-gutter-md q-mt-sm"
+      class="q-pa-md fit"
     >
       <q-input
         clearable

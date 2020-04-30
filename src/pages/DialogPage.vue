@@ -19,7 +19,7 @@
           </template>
         </q-virtual-scroll>
         <div class="row justify-center">
-          <q-btn class="q-ma-md" @click="newDialog()">Новый диалог</q-btn>
+          <q-btn class="q-ma-md" @click="newDialog()">{{$t('label.startDialog')}}</q-btn>
         </div>
       </div>
       <div class="q-ma-md column items-center col-7">
@@ -66,15 +66,15 @@
             type="textarea"
             @keydown.enter="onSend()"
           />
-          <q-btn class="q-mt-md" @click="onSend()">Send</q-btn>
+          <q-btn class="q-mt-md" @click="onSend()">{{$t('label.send')}}</q-btn>
         </div>
       </div>
       <div class="q-ma-md col-2">
         <div style="max-height: 50vh; overflow: auto; width: 100%">
-          <q-list v-for="recipient in recipients" :key="recipient.id">
+          <q-list v-for="recipient in recipients" :key="recipient.id" separator bordered>
             <q-item clickable v-ripple>
               <q-item-section>
-                <q-item-label>{{recipient.lastName + ' ' + recipient.firstName + ' ' + recipient.secondName + '. Логин: ' + recipient.login}}</q-item-label>
+                <q-item-label>{{recipient.lastName + ' ' + recipient.firstName + ' ' + recipient.secondName + '.\n Логин: ' + recipient.login}}</q-item-label>
               </q-item-section>
               <q-item-section side>
                 <q-btn v-if="currentUser.id !== recipient.id && currentDialogObj.author.id === currentUser.id" icon="delete" @click="onDeleteRecipient(recipient)"></q-btn>
@@ -179,6 +179,7 @@ function WSConnection(store, intervalToStop) {
 
 export default {
   name: "PageDialog",
+  props: ['newDialogWith'],
   data: function() {
     return {
       text: "",
@@ -423,6 +424,17 @@ export default {
     WS.regHandler("ADD_RECIPIENTS", this.addRecipientsHandler);
     WS.regHandler("DELETE_RECIPIENTS", this.deleteRecipientsHandler);
     WSConnection(this.$store);
+    console.log(this.newDialogWith);
+    if(this.newDialogWith) {
+      axios.get('http://localhost:8080/users/get', {
+        params: {
+          id: this.newDialogWith
+        }
+      }).then(response => {
+        this.newDialog();
+        this.newDialogDialog.object.recipients.push(response.data);
+      });
+    }
   }
 };
 

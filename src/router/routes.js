@@ -48,6 +48,16 @@ const routes = [
       }
     },
     {
+      path: '/dialog/:newDialogWith',
+      component: () => import('../layouts/MainLayout.vue'),
+      children: [
+        { path: '', component: () => import('pages/DialogPage.vue'), props: true }
+      ],
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
       path: '/registration',
       component: () => import('../layouts/MainLayout.vue'),
       children: [
