@@ -204,9 +204,9 @@
         </q-card-section>
 
         <q-card-section>
-          <div>
-          Оцените качество выполнения задачи:
-          <q-rating v-if="infoDialog.object && infoDialog.object.status ? infoDialog.object.status.key === 'DONE' : false" @click="onRateClick" v-model="ratingModel" size="2.0em" icon="thumb_up" />
+          <div v-if="infoDialog.object && infoDialog.object.status ? infoDialog.object.status.key === 'DONE' : false">
+          {{$t('text.rateInvitation')}}:
+          <q-rating :value="infoDialog.object.rate ? infoDialog.object.rate : 0" @input="onRateInput(infoDialog.object.id, $event)" size="2.0em" icon="thumb_up" />
           </div>
         </q-card-section>
 
@@ -220,12 +220,27 @@
         <PageProfile :user="profileDialog.object" :closeFn="() => { profileDialog.show = false; }" />
       </q-card>
     </q-dialog>
+    <q-dialog v-model="alert">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">{{$t('notify.successful')}}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          {{$t('text.rateSuccessful')}}
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="OK" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
 import Roles from "../utils/roles";
-import axios from "../boot/axios";
+import axios from "axios";
 import PageProfile from "./UserProfile";
 
 export default {
@@ -235,7 +250,7 @@ export default {
   },
   data() {
     return {
-      ratingModel: 0,
+      alert: false,
       infoDialog: {
         show: false,
         object: {}
@@ -504,6 +519,17 @@ export default {
     onProfileClick: function(user) {
       this.profileDialog.object = user;
       this.profileDialog.show = true;
+    },
+    onRateInput: function(taskId, rate) {
+      const params = {
+        id: taskId,
+        rate: rate
+      };
+      axios.post('http://localhost:8080/tasks/set-rate', params).then(response => {
+        this.$store.dispatch('TaskStore/setRate', params);
+        this.alert = true;
+        this.infoDialog.object.rate = rate;
+      });
     }
   }
 };

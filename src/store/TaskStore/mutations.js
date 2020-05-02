@@ -17,6 +17,20 @@ export function findElementInState(state, data) {
     }
 }
 
+export function findElementInStateDeep(state, data) {
+    let source = state[data.stateSrc];
+    if(source) {
+        let foundElement = source.filter(element => element.id === data.object.id)[0];
+        if(foundElement) {
+            return {
+                stateSrc: source,
+                element: foundElement,
+                index: findIndexInStateSrc(source, foundElement)
+            }
+        }
+    }
+}
+
 /* Common functions */
 
 export function change(state, changeData) {
@@ -151,4 +165,15 @@ export function setStatuses(state, statuses) {
 export function setExecutorsTasks(state, executorTasks) {
     state.page.total = executorTasks.total;
     state.tasks = executorTasks.result;
+}
+
+/* RATING */
+export function setRate(state, data) {
+    let element = findElementInStateDeep(state, {
+        stateSrc: 'tasks',
+        object: data
+    });
+    if(element.index !== -1) {
+        element.rate = data.rate;
+    }
 }

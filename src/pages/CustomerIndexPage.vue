@@ -186,13 +186,17 @@
               v-if="props.row.status && props.row.status.key === 'PROCESSING'"
               @click="doneTask(props.row)"
             />
+            <div v-if="props.row.rate">
+              {{$t('text.taskRate')}}:
+              <q-rating :value="props.row.rate" readonly size="2.0em" icon="thumb_up" />
+            </div>
             <!-- <q-btn
               class="q-ml-md"
               color="white"
               text-color="black"
               :label="$t('label.profile')"
               @click="onProfileClick(props.row.customer)"
-            ></q-btn> -->
+            ></q-btn>-->
           </q-td>
         </q-tr>
       </template>

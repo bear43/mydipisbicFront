@@ -52,7 +52,9 @@ export default {
         admin: 'Админ',
         profile: 'Профиль пользователя',
         startDialog: 'Начать новый диалог',
-        send: 'Отправить'
+        send: 'Отправить',
+        executorRating: 'Рейтинг исполнителей',
+        rating: 'Рейтинг'
     },
     notify: {
         successfulSignIn: 'Успешный вход',
@@ -68,6 +70,13 @@ export default {
         rejected: 'Отклонена с причиной',
         done: 'Выполнена',
         startDate: 'Дата начала',
-        doneDate: 'Дата окончания'
+        doneDate: 'Дата окончания',
+        rateSuccessful: 'Оценка успешно установлена',
+        rateInvitation: 'Оцените качество выполнения задачи',
+        taskRate: 'Качество выполнения задачи',
+        doneTaskCount: 'Количество выполненных задач',
+        rejectedTaskCount: 'Количество отклоненных задач',
+        taskCount: 'Количество задач',
+        averageRate: 'Средняя оценка'
     }
 }

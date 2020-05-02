@@ -256,3 +256,8 @@ export function change(context, changeData) {
 export function reset(context, resetData) {
     context.commit('reset', resetData);
 }
+
+/* RATING */
+export function setRate(context, data) {
+    context.commit('setRate', data);
+}

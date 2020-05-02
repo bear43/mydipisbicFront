@@ -15,23 +15,24 @@
             v-show="button.show()"
             @click="button.handler ? button.handler() : null"
           />
-          <q-btn-dropdown 
+          <q-btn-dropdown
             v-else
             stretch
             flat
-            :label="button.label" 
-            :to='button.to' 
+            :label="button.label"
+            :to="button.to"
             v-show="button.show()"
             @click="button.handler ? button.handler() : null"
           >
             <q-list>
               <div v-for="item in button.items" :key="item.label">
-                <q-item 
-                  clickable 
-                  v-close-popup 
-                  @click='item.handler ? item.handler() : null' 
-                  :to='item.to'
-                  v-show="item.show()">
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="item.handler ? item.handler() : null"
+                  :to="item.to"
+                  v-show="item.show()"
+                >
                   <q-item-section>
                     <q-item-label>{{item.label}}</q-item-label>
                   </q-item-section>
@@ -63,7 +64,14 @@ export default {
       activeButton: null,
       buttons: [
         {
-          to: '/dialog',
+          to: "/rating",
+          label: this.$t("label.rating"),
+          show: () => {
+            return Roles.getUser();
+          }
+        },
+        {
+          to: "/dialog",
           label: this.$t("label.dialogs"),
           show: () => {
             return Roles.getUser();
@@ -73,19 +81,19 @@ export default {
           to: null,
           label: this.$t("label.adminPanel"),
           show: () => {
-            return Roles.getUser() && Roles.hasAnyRole('ROLE_ADMIN');
+            return Roles.getUser() && Roles.hasAnyRole("ROLE_ADMIN");
           },
           collapsible: true,
           items: [
             {
-              label: this.$t('label.taskTypes'),
+              label: this.$t("label.taskTypes"),
               show: () => true,
-              to: '/task-types'
+              to: "/task-types"
             },
             {
-              label: this.$t('label.users'),
+              label: this.$t("label.users"),
               show: () => true,
-              to: '/users'
+              to: "/users"
             }
           ]
         },

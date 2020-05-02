@@ -48,6 +48,16 @@ const routes = [
       }
     },
     {
+      path: '/rating',
+      component: () => import('../layouts/MainLayout.vue'),
+      children: [
+        { path: '', component: () => import('pages/ExecutorRatingPage.vue') }
+      ],
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
       path: '/dialog/:newDialogWith',
       component: () => import('../layouts/MainLayout.vue'),
       children: [
