@@ -113,6 +113,18 @@
                 v-if="props.row.status ? props.row.status.key === 'PENDING' : column.show"
               />
             </div>
+            <div v-else-if="column.name === 'description'">
+              <q-btn
+                :label="$t('label.edit')"
+                @click="column.handler ? column.handler(column.value, false) : null"
+                v-if="props.row.status ? props.row.status.key === 'PENDING' : column.show"
+              />
+              <q-btn
+                :label="$t('label.read')"
+                @click.stop="column.handler ? column.handler(column.value, true) : null"
+                v-else
+              />
+            </div>
             <div v-else-if="column.special">
               <q-btn
                 :icon="column.name"
@@ -204,9 +216,16 @@
         </q-card-section>
 
         <q-card-section>
-          <div v-if="infoDialog.object && infoDialog.object.status ? infoDialog.object.status.key === 'DONE' : false">
-          {{$t('text.rateInvitation')}}:
-          <q-rating :value="infoDialog.object.rate ? infoDialog.object.rate : 0" @input="onRateInput(infoDialog.object.id, $event)" size="2.0em" icon="thumb_up" />
+          <div
+            v-if="infoDialog.object && infoDialog.object.status ? infoDialog.object.status.key === 'DONE' : false"
+          >
+            {{$t('text.rateInvitation')}}:
+            <q-rating
+              :value="infoDialog.object.rate ? infoDialog.object.rate : 0"
+              @input="onRateInput(infoDialog.object.id, $event)"
+              size="2.0em"
+              icon="thumb_up"
+            />
           </div>
         </q-card-section>
 
@@ -226,12 +245,39 @@
           <div class="text-h6">{{$t('notify.successful')}}</div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          {{$t('text.rateSuccessful')}}
-        </q-card-section>
+        <q-card-section class="q-pt-none">{{$t('text.rateSuccessful')}}</q-card-section>
 
         <q-card-actions align="right">
           <q-btn flat label="OK" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="descriptionDialog.show">
+      <q-card style="min-width: 500px;">
+        <q-card-section>
+          <div class="text-h6">{{$t(descriptionDialog.object ? 'text.changeDescription' : 'label.description')}}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            dense
+            clearable
+            :label="$t('label.description')"
+            v-model="descriptionDialog.description"
+            type="textarea"
+            :readonly="descriptionDialog.object == null"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('label.close')" color="primary" v-close-popup />
+          <q-btn
+            flat
+            :label="$t('label.submit')"
+            color="primary"
+            @click="onSubmitDescriptionClick()"
+            v-if="descriptionDialog.object != null"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -251,6 +297,11 @@ export default {
   data() {
     return {
       alert: false,
+      descriptionDialog: {
+        show: false,
+        object: {},
+        description: ""
+      },
       infoDialog: {
         show: false,
         object: {}
@@ -310,6 +361,20 @@ export default {
               property: "title",
               value: event.target.value
             });
+          }
+        },
+        {
+          name: "description",
+          required: true,
+          label: this.$t("label.description"),
+          align: "center",
+          field: item => item,
+          sortable: false,
+          show: true,
+          handler: (item, readOnly) => {
+            this.descriptionDialog.object = readOnly ? null : item;
+            this.descriptionDialog.description = item.description;
+            this.descriptionDialog.show = true;
           }
         },
         {
@@ -446,8 +511,8 @@ export default {
     },
     columnsComputed: function() {
       const columns = this.columns;
-      const priorityColumn = columns[4];
-      const typeColumn = columns[5];
+      const priorityColumn = columns[5];
+      const typeColumn = columns[6];
       priorityColumn.options = this.priorities;
       typeColumn.options = this.types;
       return columns;
@@ -525,11 +590,22 @@ export default {
         id: taskId,
         rate: rate
       };
-      axios.post('http://localhost:8080/tasks/set-rate', params).then(response => {
-        this.$store.dispatch('TaskStore/setRate', params);
-        this.alert = true;
-        this.infoDialog.object.rate = rate;
+      axios
+        .post("http://localhost:8080/tasks/set-rate", params)
+        .then(response => {
+          this.$store.dispatch("TaskStore/setRate", params);
+          this.alert = true;
+          this.infoDialog.object.rate = rate;
+        });
+    },
+    onSubmitDescriptionClick: function() {
+      this.$store.dispatch("TaskStore/change", {
+        stateSrc: "tasks",
+        data: this.descriptionDialog.object,
+        property: "description",
+        value: this.descriptionDialog.description
       });
+      this.descriptionDialog.show = false;
     }
   }
 };

@@ -73,6 +73,7 @@ export function addNewTask(context) {
     context.commit('addTask', {
         id: null,
         title: '',
+        description: '',
         priority: null,
         status: null,
         type: null,

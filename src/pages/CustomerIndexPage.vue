@@ -186,6 +186,13 @@
               v-if="props.row.status && props.row.status.key === 'PROCESSING'"
               @click="doneTask(props.row)"
             />
+            <q-btn
+              class="q-ml-md"
+              color="white"
+              text-color="black"
+              :label="$t('label.description')"
+              @click="() => {descriptionDialog.description = props.row.description; descriptionDialog.show = true}"
+            />
             <div v-if="props.row.rate">
               {{$t('text.taskRate')}}:
               <q-rating :value="props.row.rate" readonly size="2.0em" icon="thumb_up" />
@@ -212,7 +219,6 @@
             dense
             :value="rejectDialog.object ? rejectDialog.object.rejectReason : null"
             autofocus
-            @keyup.enter="rejectDialog.show = false"
             type="textarea"
             @input="onChangeRejectReason(rejectDialog.object, $event)"
           />
@@ -235,7 +241,6 @@
             dense
             :value="doneDialog.object ? doneDialog.object.doneMsg : null"
             autofocus
-            @keyup.enter="doneDialog.show = false"
             type="textarea"
             @input="onChangeDoneMsg(doneDialog.object, $event)"
           />
@@ -252,6 +257,28 @@
         <PageProfile :user="profileDialog.object" :closeFn="() => { profileDialog.show = false; }" />
       </q-card>
     </q-dialog>
+    <q-dialog v-model="descriptionDialog.show">
+      <q-card style="min-width: 500px;">
+        <q-card-section>
+          <div class="text-h6">{{$t('label.description')}}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <q-input
+            dense
+            clearable
+            :label="$t('label.description')"
+            v-model="descriptionDialog.description"
+            type="textarea"
+            readonly
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('label.close')" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
@@ -266,6 +293,10 @@ export default {
   data() {
     return {
       noExecutor: false,
+      descriptionDialog: {
+        show: false,
+        description: ''
+      },
       doneDialog: {
         show: false,
         object: null

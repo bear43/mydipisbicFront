@@ -54,7 +54,9 @@ export default {
         startDialog: 'Начать новый диалог',
         send: 'Отправить',
         executorRating: 'Рейтинг исполнителей',
-        rating: 'Рейтинг'
+        rating: 'Рейтинг',
+        description: 'Описание',
+        read: 'Просмотреть'
     },
     notify: {
         successfulSignIn: 'Успешный вход',
@@ -77,6 +79,7 @@ export default {
         doneTaskCount: 'Количество выполненных задач',
         rejectedTaskCount: 'Количество отклоненных задач',
         taskCount: 'Количество задач',
-        averageRate: 'Средняя оценка'
+        averageRate: 'Средняя оценка',
+        changeDescription: 'Изменить описание'
     }
 }
